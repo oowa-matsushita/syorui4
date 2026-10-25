@@ -168,6 +168,18 @@
   .mchip.on .mbox { background: var(--ink); border-color: var(--ink); }
   .mchip.on .mbox::after { content: ""; width: 4px; height: 8px; margin-top: -2px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
 
+  /* ---- カーソルを乗せたときの縮小表示 ---- */
+  .peek {
+    position: fixed; z-index: 30; pointer-events: none;
+    background: var(--sheet); border: 1px solid var(--ink); border-radius: 6px;
+    box-shadow: 0 6px 20px rgba(28, 43, 58, .25); padding: 6px;
+    display: none;
+  }
+  .peek.show { display: block; }
+  .peek img, .peek canvas { display: block; max-width: 340px; max-height: 340px; }
+  .peek .wait { width: 240px; height: 120px; display: grid; place-items: center; color: var(--muted); font-size: .85rem; }
+  .peek .cap { font-size: .75rem; color: var(--muted); margin-top: 4px; text-align: center; }
+
   /* ---- 添付書類 ---- */
   .att { margin-top: 24px; }
   .att-head {
@@ -322,9 +334,10 @@
   <button value="cancel" class="ask-x" aria-label="印刷をやめる">×</button>
 </dialog>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="peek" id="peek" aria-hidden="true"></div>
 
-<script src="data.js?v=20261022a"></script>
-<script src="attach.js?v=20261022a"></script>
+<script src="data.js?v=20261025a"></script>
+<script src="attach.js?v=20261025a"></script>
 <script>
 (() => {
   const $ = (s) => document.querySelector(s);
@@ -949,6 +962,99 @@
       if (win) win.close();
       toast(err.message, true);
     }
+  }
+
+  // ---------- カーソルを乗せると書類を縮小表示（名刺サイズくらい） ----------
+  const peek = $("#peek");
+  const thumbs = {};          // 一度作った縮小画像は使い回す
+  let peekFile = null, mx = 0, my = 0, pdfjsReady = null;
+
+  function loadPdfjs() {
+    if (!pdfjsReady) pdfjsReady = new Promise((res, rej) => {
+      const sc = document.createElement("script");
+      sc.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+      sc.onload = () => {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+        res(pdfjsLib);
+      };
+      sc.onerror = () => { pdfjsReady = null; rej(new Error("pdf.js")); };
+      document.head.appendChild(sc);
+    });
+    return pdfjsReady;
+  }
+
+  async function makeThumb(file) {
+    if (/\.pdf$/i.test(file)) {
+      const bytes = await load(file);
+      if (!bytes) return null;
+      const lib = await loadPdfjs();
+      const pdf = await lib.getDocument({ data: new Uint8Array(bytes) }).promise;
+      const page = await pdf.getPage(1);
+      const v1 = page.getViewport({ scale: 1 });
+      const k = Math.min(340 / v1.width, 340 / v1.height) * 2;   // 2倍で描いてくっきり表示
+      const vp = page.getViewport({ scale: k });
+      const c = document.createElement("canvas");
+      c.width = vp.width; c.height = vp.height;
+      c.style.width = vp.width / 2 + "px"; c.style.height = vp.height / 2 + "px";
+      await page.render({ canvasContext: c.getContext("2d"), viewport: vp }).promise;
+      return { el: c, pages: pdf.numPages };
+    }
+    const bytes = await load(file);
+    if (!bytes) return null;
+    const img = new Image();
+    img.src = URL.createObjectURL(new Blob([bytes]));
+    await img.decode();
+    return { el: img, pages: 1 };
+  }
+
+  function placePeek() {
+    const w = peek.offsetWidth, h = peek.offsetHeight, pad = 16;
+    let x = mx + pad, y = my + pad;
+    if (x + w > innerWidth - 8) x = mx - w - pad;
+    if (y + h > innerHeight - 8) y = Math.max(8, innerHeight - h - 8);
+    peek.style.left = Math.max(8, x) + "px";
+    peek.style.top = y + "px";
+  }
+
+  async function showPeek(file) {
+    if (peekFile === file) return;
+    peekFile = file;
+    peek.innerHTML = '<div class="wait">読み込み中…</div>';
+    peek.classList.add("show"); placePeek();
+    try {
+      if (!(file in thumbs)) thumbs[file] = makeThumb(file);
+      const t = await thumbs[file];
+      if (peekFile !== file) return;
+      if (!t) { peek.innerHTML = '<div class="wait">ファイルが見つかりません</div>'; placePeek(); return; }
+      peek.innerHTML = "";
+      peek.appendChild(t.el);
+      if (t.pages > 1) peek.insertAdjacentHTML("beforeend", `<div class="cap">1ページ目（全${t.pages}ページ）</div>`);
+      placePeek();
+    } catch (_) {
+      delete thumbs[file];
+      if (peekFile === file) { peek.innerHTML = '<div class="wait">表示できません</div>'; placePeek(); }
+    }
+  }
+  function hidePeek() { peekFile = null; peek.classList.remove("show"); }
+
+  // マウスのあるパソコンだけで動かす（スマホ・タブレットでは表示しない）
+  if (matchMedia("(hover: hover) and (pointer: fine)").matches) {
+    let timer = null;
+    $("#main").addEventListener("mousemove", (e) => {
+      mx = e.clientX; my = e.clientY;
+      const card = e.target.closest(".item");
+      const x = card && !card.classList.contains("none") ? byId(card.dataset.id) : null;
+      // 「見本」ボタンの上では見本を、それ以外では書類を表示
+      let file = null;
+      if (x && !x.text && !x.obtain) file = e.target.closest('[data-act="mihon"]') ? x.mihon : fileOf(x);
+      if (e.target.closest("select, .stepper")) file = null;   // プルダウンや部数の操作中は出さない
+      clearTimeout(timer);
+      if (!file) { hidePeek(); return; }
+      if (peek.classList.contains("show")) { placePeek(); if (file !== peekFile) showPeek(file); return; }
+      timer = setTimeout(() => showPeek(file), 250);   // 少し止めたときだけ表示
+    });
+    $("#main").addEventListener("mouseleave", () => { clearTimeout(timer); hidePeek(); });
+    addEventListener("scroll", hidePeek, { passive: true });
   }
 
   attSetup();
