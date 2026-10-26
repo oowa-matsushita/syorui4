@@ -238,6 +238,8 @@
     font: inherit; font-size: .95rem; line-height: 1.7; color: var(--ink);
     border: 2px solid var(--ink); border-radius: 5px; padding: 10px; background: var(--sheet);
   }
+  .att-title { text-align: center; font-weight: 700; font-size: 1.15rem; letter-spacing: .08em; margin-bottom: 12px; }
+  .att-title:empty { display: none; }
   .att-paper [hidden] { display: none !important; }
   .att-foot { margin-top: 12px; padding-top: 8px; border-top: 1px solid var(--line); font-size: .8rem; text-align: center; color: var(--muted); line-height: 1.6; }
   .att-edit-btns { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 10px; }
@@ -293,6 +295,7 @@
       </div>
       <details class="att-prev" id="attPrevBox"><summary>印刷される文章を確認</summary>
         <div class="att-paper">
+          <div class="att-title" id="attTitle"></div>
           <pre id="attPrev"></pre>
           <textarea id="attEdit" spellcheck="false" hidden aria-label="印刷される文章を編集"></textarea>
           <div class="att-foot" id="attFoot"></div>
@@ -336,8 +339,8 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="peek" id="peek" aria-hidden="true"></div>
 
-<script src="data.js?v=20261025a"></script>
-<script src="attach.js?v=20261025a"></script>
+<script src="data.js?v=20261026a"></script>
+<script src="attach.js?v=20261026a"></script>
 <script>
 (() => {
   const $ = (s) => document.querySelector(s);
@@ -422,6 +425,7 @@
   function attPreview() {
     $("#attPrev").textContent = attFinal();
     $("#attFoot").innerHTML = attSig().map(esc).join("<br>");
+    $("#attTitle").textContent = ATTACH.title || "";
     const edited = att.custom != null;
     $("#attReset").hidden = !edited;
     $("#attEdited").hidden = !edited;
@@ -793,7 +797,7 @@
   });
 
   // 文面をA4縦のページ画像にする（必要なだけページを分けます）
-  async function textPages(text, footer) {
+  async function textPages(text, footer, title) {
     footer = footer || [];
     const F = '"BIZ UDPGothic", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif';
     try { await document.fonts.load(`400 11px "BIZ UDPGothic"`); } catch (_) {}
@@ -815,6 +819,8 @@
       lines.push(cur);
     });
 
+    // タイトル（1ページ目の一番上・真ん中そろえ）。行2つ分の場所を使う
+    if (title) lines.unshift("\u0002" + title, "", "");
     const pages = [];
     for (let i = 0; i < lines.length; i += perPage) {
       const c = document.createElement("canvas");
@@ -823,7 +829,13 @@
       g.scale(S, S);
       g.fillStyle = "#fff"; g.fillRect(0, 0, W, H);
       g.fillStyle = "#000"; g.font = `400 ${SIZE}px ${F}`; g.textBaseline = "alphabetic";
-      lines.slice(i, i + perPage).forEach((ln, j) => g.fillText(ln, M, M + LH * (j + 1)));
+      lines.slice(i, i + perPage).forEach((ln, j) => {
+        if (ln.startsWith("\u0002")) {
+          g.font = `700 17px ${F}`; g.textAlign = "center";
+          g.fillText(ln.slice(1), W / 2, M + LH * (j + 1) + 4);
+          g.textAlign = "left"; g.font = `400 ${SIZE}px ${F}`;
+        } else g.fillText(ln, M, M + LH * (j + 1));
+      });
       if (footer.length) {
         // ページの一番下に会社の署名（横長・中央）
         const top = H - M + 14 - footer.length * FLH;
@@ -875,7 +887,7 @@
     const out = await PDFDocument.create();
     // 添付書類（ご案内文）は頭紙より前に入れる
     for (const x of list.filter((d) => d.attach)) {
-      const pages = await textPages(attFinal(), attSig());
+      const pages = await textPages(attFinal(), attSig(), ATTACH.title);
       for (let c = 0; c < x.copies; c++) {
         for (const pb of pages) {
           const img = await out.embedPng(pb);
@@ -893,7 +905,7 @@
     let added = 0;
     for (const x of list) {
       if (x.text || x.attach) {
-        const pages = await textPages(x.attach ? attFinal() : textOf(x), x.attach ? attSig() : []);
+        const pages = await textPages(x.attach ? attFinal() : textOf(x), x.attach ? attSig() : [], x.attach ? ATTACH.title : "");
         for (let c = 0; c < x.copies; c++) {
           for (const pb of pages) {
             const img = await out.embedPng(pb);
