@@ -21,7 +21,7 @@ const COVER = {
   groupMain: "ご返送いただく書類",            // coverGroup の指定がない書類と、上の車庫証明はこちら
   groupObtain: "役所などで取得いただく書類",   // 「役所などで取得」の欄はこちら
   // 「車庫証明はお客様出し」＝はい のとき、返送リストに載せない書類（画面の名前で指定）
-  garageHide: ["車庫申請書（1枚のみ）", "配置図（敷地内）", "配置図（離れてる場合）", "自認書", "保管場所使用承諾証明書"],
+  garageHide: ["車庫申請書（1枚のみ）", "配置図", "自認書", "保管場所使用承諾証明書"],
 };
 
 // =====================================================================
@@ -44,9 +44,8 @@ const PRINT_ORDER = [
   "還付書類（愛知県）（見本）",
   "車庫証明の提出の仕方",
   "車庫申請書（1枚のみ）",
-  "配置図（敷地内）",
+  "配置図",                      // 敷地内・離れてる場合のプルダウン
   "配置図（敷地内）（見本）",
-  "配置図（離れてる場合）",
   "配置図（離れてる場合）（見本）",
   "自認書",
   "車庫証明（4枚一式）",
@@ -97,8 +96,10 @@ const SECTIONS = [
       { name: "譲渡証明書",             file: "joto.pdf",           mihon: "mihon-joto.jpg",           mihonName: "譲渡証明書（見本）" },
       { name: "車庫申請書（1枚のみ）",   file: "shako-shinsei.pdf" },
       { name: "自認書",                 file: "jinin.pdf",          mihon: "mihon-jinin.jpg",          mihonName: "自認書（見本）" },
-      { name: "配置図（敷地内）",       file: "haichizu.pdf",       mihon: "mihon-haichizu.jpg",       mihonName: "配置図（敷地内）（見本）" },
-      { name: "配置図（離れてる場合）", file: "haichizu.pdf",       mihon: "mihon-haichizu-hanare.jpg", mihonName: "配置図（離れてる場合）（見本）" },
+      { name: "配置図", choices: [
+        { name: "敷地内",       file: "haichizu.pdf", mihon: "mihon-haichizu.jpg",        mihonName: "配置図（敷地内）（見本）" },
+        { name: "離れてる場合", file: "haichizu.pdf", mihon: "mihon-haichizu-hanare.jpg", mihonName: "配置図（離れてる場合）（見本）" },
+      ] },
       { name: "保管場所使用承諾証明書", file: "shodaku.pdf",        mihon: "mihon-shodaku.jpg",        mihonName: "保管場所使用承諾証明書（見本）" },
       { name: "所有権解除依頼書",       file: "shoyuken-kaijo.pdf", mihon: "mihon-shoyuken-kaijo.png", mihonName: "所有権解除依頼書（見本）" },
     ],

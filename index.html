@@ -91,7 +91,7 @@
   .one { white-space: nowrap; }
   /* 書類の中のプルダウン（委任状の個人／法人）は名前の横に小さく並べ、カードの高さをそろえる */
   .pick.inline { flex-wrap: nowrap; gap: 8px; }
-  .pick.inline select { min-width: 0; width: 5.2em; padding: 4px 4px; font-size: .95rem; }
+  .pick.inline select { min-width: 0; width: auto; padding: 4px 4px; font-size: .95rem; }
   .pick select {
     font: inherit; font-size: 1rem; color: var(--ink); background: var(--sheet);
     border: 2px solid var(--ink); border-radius: 5px; padding: 6px 8px; min-width: 9em;
@@ -342,8 +342,8 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="peek" id="peek" aria-hidden="true"></div>
 
-<script src="data.js?v=20261109f"></script>
-<script src="attach.js?v=20261109f"></script>
+<script src="data.js?v=20261109g"></script>
+<script src="attach.js?v=20261109g"></script>
 <script>
 (() => {
   const $ = (s) => document.querySelector(s);
