@@ -339,8 +339,8 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="peek" id="peek" aria-hidden="true"></div>
 
-<script src="data.js?v=20261109a"></script>
-<script src="attach.js?v=20261109a"></script>
+<script src="data.js?v=20261109b"></script>
+<script src="attach.js?v=20261109b"></script>
 <script>
 (() => {
   const $ = (s) => document.querySelector(s);
@@ -396,8 +396,11 @@
   const attItem = { attach: true, id: "attach", sec: "添付書類", name: "添付書類", copies: 1, inList: false, on: false };
   const selected = () => (attItem.on ? [attItem] : []).concat(items.filter((x) => x.on));
   // 「見本」にチェックがある書類は、見本の画像も印刷する（見本は1部・返送リストには載せない）
-  const withMihon = (list) => list.flatMap((x) => (x.withMihon && x.mihon)
-    ? [x, { name: x.mihonName, file: x.mihon, copies: 1, inList: false, sec: x.sec }] : [x]);
+  // プルダウンの欄は、選んでいる項目に見本があるときだけ見本を使う
+  const mihonOf = (x) => (x.choices ? (x.choices[x.pick] || {}).mihon : x.mihon);
+  const mihonNameOf = (x) => (x.choices ? (x.choices[x.pick] || {}).mihonName : x.mihonName);
+  const withMihon = (list) => list.flatMap((x) => (x.withMihon && mihonOf(x))
+    ? [x, { name: mihonNameOf(x), file: mihonOf(x), copies: 1, inList: false, sec: x.sec }] : [x]);
   const att = { cust: "", staff: "", days: [], other: false, memo: "", picks: [], free: "" };
   let staffList = [];
 
@@ -543,6 +546,7 @@
           </select>
         </div>
         <div class="ctrl">
+          ${mihonOf(x) ? `<button class="mchip ${x.withMihon ? "on" : ""}" data-act="mihon" aria-pressed="${x.withMihon}"><span class="mbox" aria-hidden="true"></span>見本</button>` : ""}
           <div class="stepper">
             <button data-act="minus" aria-label="部数を減らす" ${x.copies <= 1 ? "disabled" : ""}>−</button>
             <output>${x.copies}部</output>
@@ -632,6 +636,7 @@
     if (!el) return;
     const x = byId(el.closest(".item").dataset.id);
     x.pick = Number(el.value);
+    if (!mihonOf(x)) x.withMihon = false;   // 見本のない県に変えたら見本は外す
     x.on = true;
     redraw(x, "[data-act='pick']");
   });
@@ -1058,7 +1063,7 @@
       const x = card && !card.classList.contains("none") ? byId(card.dataset.id) : null;
       // 「見本」ボタンの上では見本を、それ以外では書類を表示
       let file = null;
-      if (x && !x.text && !x.obtain) file = e.target.closest('[data-act="mihon"]') ? x.mihon : fileOf(x);
+      if (x && !x.text && !x.obtain) file = e.target.closest('[data-act="mihon"]') ? mihonOf(x) : fileOf(x);
       if (e.target.closest("select, .stepper")) file = null;   // プルダウンや部数の操作中は出さない
       clearTimeout(timer);
       if (!file) { hidePeek(); return; }

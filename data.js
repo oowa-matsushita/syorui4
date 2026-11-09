@@ -41,6 +41,7 @@ const PRINT_ORDER = [
   "所有権解除依頼書",
   "所有権解除依頼書（見本）",
   "還付書類",                    // 都道府県のプルダウン
+  "還付書類（静岡県）（見本）",
   "車庫証明の提出の仕方",
   "車庫申請書（1枚のみ）",
   "配置図",
@@ -111,7 +112,7 @@ const SECTIONS = [
     listName: "還付書類（{name}）",    // チェックリストでの表示名
     items: [
       { group: "東海・北陸・近畿", name: "愛知県",   file: "kanpu-aichi.pdf" },
-      { group: "東海・北陸・近畿", name: "静岡県",   file: "kanpu-shizuoka.pdf", default: true },   // 最初に選ばれる県
+      { group: "東海・北陸・近畿", name: "静岡県",   file: "kanpu-shizuoka.pdf", default: true, mihon: "mihon-kanpu-shizuoka.jpg", mihonName: "還付書類（静岡県）（見本）" },   // 最初に選ばれる県
       { group: "東海・北陸・近畿", name: "三重県",   file: "kanpu-mie.pdf" },
       { group: "東海・北陸・近畿", name: "岐阜県",   file: "kanpu-gifu.pdf" },
       { group: "東海・北陸・近畿", name: "富山県",   file: "toyama.pdf" },
