@@ -89,6 +89,9 @@
     border: solid #fff; border-width: 0 3px 3px 0; transform: rotate(45deg);
   }
   .one { white-space: nowrap; }
+  /* 県を選んだときに出る説明（原本が必要な県は赤で目立たせる） */
+  .pick-note { grid-column: 1 / -1; font-size: .9rem; color: var(--ink); background: var(--paper); border-radius: 5px; padding: 6px 10px; margin-top: 2px; }
+  .pick-note.gen { color: var(--shu); font-weight: 700; background: #FBEDEB; }
   /* 書類の中のプルダウン（委任状の個人／法人）は名前の横に小さく並べ、カードの高さをそろえる */
   .pick.inline { flex-wrap: nowrap; gap: 8px; }
   .pick.inline select { min-width: 0; width: auto; padding: 4px 4px; font-size: .95rem; }
@@ -349,8 +352,8 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="peek" id="peek" aria-hidden="true"></div>
 
-<script src="data.js?v=20261109l"></script>
-<script src="attach.js?v=20261109l"></script>
+<script src="data.js?v=20261109m"></script>
+<script src="attach.js?v=20261109m"></script>
 <script>
 (() => {
   const $ = (s) => document.querySelector(s);
@@ -584,6 +587,7 @@
           </div>
           <button class="one" data-act="print" ${file ? "" : "disabled"}>印刷</button>
         </div>
+        ${chosen(x).note ? `<div class="pick-note${/原本/.test(chosen(x).note) && !/原本またはコピー/.test(chosen(x).note) ? " gen" : ""}">${esc(chosen(x).note)}</div>` : ""}
       </div>`;
     }
     if (!x.file && !x.obtain) {
