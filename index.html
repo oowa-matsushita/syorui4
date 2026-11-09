@@ -4,10 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>書類印刷</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <style>
   :root {
     --paper: #F2F3F1;
@@ -382,8 +378,8 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="peek" id="peek" aria-hidden="true"></div>
 
-<script src="data.js?v=20261109t"></script>
-<script src="attach.js?v=20261109t"></script>
+<script src="data.js?v=20261109u"></script>
+<script src="attach.js?v=20261109u"></script>
 <script>
 (() => {
   const $ = (s) => document.querySelector(s);
@@ -394,6 +390,11 @@
 
   // 右上に GitHub の更新番号（何回目の更新か）と日時を表示する
   (async () => {
+    const show = (v) => { $("#ver").textContent = v.text; $("#ver").title = v.msg; };
+    try {
+      const saved = JSON.parse(sessionStorage.getItem("ver") || "null");
+      if (saved && Date.now() - saved.at < 10 * 60 * 1000) { show(saved); return; }
+    } catch (_) {}
     try {
       const m = location.hostname.match(/^([^.]+)\.github\.io$/);
       const repo = m ? `${m[1]}/${location.pathname.split("/")[1]}` : "yamattt5656/syorui4";
@@ -404,8 +405,9 @@
       const no = last ? last[1] : "1";
       const d = new Date(c.commit.committer.date);
       const p2 = (n) => String(n).padStart(2, "0");
-      $("#ver").textContent = `更新 No.${no}（${d.getMonth() + 1}/${d.getDate()} ${p2(d.getHours())}:${p2(d.getMinutes())}・${c.sha.slice(0, 7)}）`;
-      $("#ver").title = c.commit.message.split("\n")[0];
+      const v = { text: `更新 No.${no}（${d.getMonth() + 1}/${d.getDate()} ${p2(d.getHours())}:${p2(d.getMinutes())}・${c.sha.slice(0, 7)}）`, msg: c.commit.message.split("\n")[0], at: Date.now() };
+      show(v);
+      try { sessionStorage.setItem("ver", JSON.stringify(v)); } catch (_) {}
     } catch (_) { /* 取得できないときは書いてある日時のまま */ }
   })();
 
@@ -1026,7 +1028,30 @@
   }
 
   // ファイルの置き場所がずれていても見つけられるよう、いくつかの場所を順に探す
+  // PDFを1つにまとめる道具（pdf-lib）は、最初に印刷するときだけ読み込む（画面の表示を軽くするため）
+  let pdfLibReady = null;
+  function loadPdfLib() {
+    if (window.PDFLib) return Promise.resolve();
+    if (!pdfLibReady) pdfLibReady = new Promise((res, rej) => {
+      const sc = document.createElement("script");
+      sc.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js";
+      sc.onload = () => res();
+      sc.onerror = () => { pdfLibReady = null; rej(new Error("印刷の準備に失敗しました。インターネットの接続を確認して、もう一度押してください。")); };
+      document.head.appendChild(sc);
+    });
+    return pdfLibReady;
+  }
+  // 一度読み込んだPDF・画像はページを開いている間覚えておき、2回目からすぐ使う
+  const fileCache = new Map();
   async function load(file) {
+    if (!fileCache.has(file)) {
+      const p = loadFromServer(file).then((b) => { if (!b) fileCache.delete(file); return b; });
+      fileCache.set(file, p);
+    }
+    const b = await fileCache.get(file);
+    return b ? b.slice(0) : null;   // 使う側で書き換えられても困らないようにコピーを渡す
+  }
+  async function loadFromServer(file) {
     if (location.protocol === "file:") {
       throw new Error("パソコン上で直接開くと読み込めません。公開したURLから使ってください。");
     }
@@ -1045,6 +1070,7 @@
 
   // 選んだ書類を部数分つなげて1つのPDFにする（画像はA4横1枚に収める）
   async function build(list, cover) {
+    await loadPdfLib();
     const { PDFDocument } = PDFLib;
     const out = await PDFDocument.create();
     // 添付書類（ご案内文）は頭紙より前に入れる
