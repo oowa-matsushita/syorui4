@@ -31,7 +31,6 @@
     padding: calc(16px + env(safe-area-inset-top, 0px)) 24px 14px;
   }
   header { position: relative; }
-  .ver { position: absolute; right: 24px; bottom: 16px; font-size: .75rem; color: var(--muted); white-space: nowrap; }
   header h1 { margin: 0 auto; max-width: 1080px; font-size: 1.4rem; letter-spacing: .06em; }
   /* ロゴ */
   .logo { display: flex; align-items: center; gap: 12px; }
@@ -299,7 +298,6 @@
     <span class="word"><span class="w1">書類印刷</span><span class="w2">システム</span></span>
     <span class="by">by 松下モータース</span>
   </h1>
-  <span class="ver" id="ver">最終更新 11/9 17:10</span>
 </header>
 <main>
   <section class="att" id="att" hidden>
@@ -378,8 +376,8 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="peek" id="peek" aria-hidden="true"></div>
 
-<script src="data.js?v=20261109u"></script>
-<script src="attach.js?v=20261109u"></script>
+<script src="data.js?v=20261109v"></script>
+<script src="attach.js?v=20261109v"></script>
 <script>
 (() => {
   const $ = (s) => document.querySelector(s);
@@ -388,28 +386,6 @@
   document.title = TITLE;
   // タイトルはロゴで表示（TITLE はブラウザのタブ名に使う）
 
-  // 右上に GitHub の更新番号（何回目の更新か）と日時を表示する
-  (async () => {
-    const show = (v) => { $("#ver").textContent = v.text; $("#ver").title = v.msg; };
-    try {
-      const saved = JSON.parse(sessionStorage.getItem("ver") || "null");
-      if (saved && Date.now() - saved.at < 10 * 60 * 1000) { show(saved); return; }
-    } catch (_) {}
-    try {
-      const m = location.hostname.match(/^([^.]+)\.github\.io$/);
-      const repo = m ? `${m[1]}/${location.pathname.split("/")[1]}` : "yamattt5656/syorui4";
-      const res = await fetch(`https://api.github.com/repos/${repo}/commits?sha=main&per_page=1`, { cache: "no-store" });
-      if (!res.ok) return;
-      const [c] = await res.json();
-      const last = (res.headers.get("Link") || "").match(/[?&]page=(\d+)>; rel="last"/);
-      const no = last ? last[1] : "1";
-      const d = new Date(c.commit.committer.date);
-      const p2 = (n) => String(n).padStart(2, "0");
-      const v = { text: `更新 No.${no}（${d.getMonth() + 1}/${d.getDate()} ${p2(d.getHours())}:${p2(d.getMinutes())}・${c.sha.slice(0, 7)}）`, msg: c.commit.message.split("\n")[0], at: Date.now() };
-      show(v);
-      try { sessionStorage.setItem("ver", JSON.stringify(v)); } catch (_) {}
-    } catch (_) { /* 取得できないときは書いてある日時のまま */ }
-  })();
 
   // 状態：書類ごとに 選択 と 部数
   const items = [];
