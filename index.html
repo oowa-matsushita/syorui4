@@ -282,6 +282,36 @@
     .grid { grid-template-columns: 1fr; }
   }
   @media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
+  /* ---- 押したときの動き ---- */
+  .item, .one, .go, .clear, .mchip, .stepper button, .chip, .att-head, .ed-btns button, .ask-btns button {
+    transition: transform .12s cubic-bezier(.3,.7,.4,1.4), background-color .15s, border-color .15s, box-shadow .15s;
+  }
+  .item:not(.none):active { transform: scale(.985); }
+  .item:has(button:active, select:active):active { transform: none; }
+  .one:active, .clear:active, .mchip:active, .chip:active, .ed-btns button:active, .ask-btns button:active { transform: scale(.94); }
+  .stepper button:not(:disabled):active { transform: scale(.8); }
+  .go:not(:disabled):hover { box-shadow: 0 4px 14px rgba(0,0,0,.25); transform: translateY(-1px); }
+  .go:not(:disabled):active { transform: scale(.95); box-shadow: none; }
+  .go, .clear { position: relative; overflow: hidden; }
+  .ripple { position: absolute; border-radius: 50%; pointer-events: none; transform: scale(0); opacity: .35; background: currentColor; animation: ripple .5s ease-out forwards; }
+  @keyframes ripple { to { transform: scale(2.6); opacity: 0; } }
+  /* チェックが付いた瞬間：チェック欄がぽんっと弾んで、カードの周りに輪が広がる */
+  .item.fx-on .mark { animation: pop .38s cubic-bezier(.3,.7,.4,1.5); }
+  .item.fx-on .mark::after { animation: tick .28s .06s ease-out both; }
+  .item.fx-on { animation: halo .55s ease-out; }
+  .item.fx-off .mark { animation: shrink .2s ease-out; }
+  .mchip.fx .mbox { animation: pop .34s cubic-bezier(.3,.7,.4,1.5); }
+  .stepper output.fx { animation: bump .25s ease-out; }
+  .count.fx strong { display: inline-block; animation: bump .3s ease-out; }
+  @keyframes pop { 0% { transform: scale(.6); } 60% { transform: scale(1.18); } 100% { transform: scale(1); } }
+  @keyframes tick { from { opacity: 0; transform: rotate(45deg) scale(.3); } to { opacity: 1; transform: rotate(45deg) scale(1); } }
+  @keyframes shrink { 50% { transform: scale(.85); } }
+  @keyframes halo { 0% { box-shadow: 0 0 0 0 rgba(28,43,58,.28); } 100% { box-shadow: 0 0 0 10px rgba(28,43,58,0); } }
+  @keyframes bump { 40% { transform: scale(1.3); } }
+  @media (prefers-reduced-motion: reduce) {
+    .item, .one, .go, .clear, .mchip, .stepper button, .chip { transition: none !important; }
+    .item.fx-on, .item.fx-on .mark, .item.fx-on .mark::after, .item.fx-off .mark, .mchip.fx .mbox, .stepper output.fx, .count.fx strong, .ripple { animation: none !important; }
+  }
 </style>
 </head>
 <body>
@@ -375,8 +405,8 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="peek" id="peek" aria-hidden="true"></div>
 
-<script src="data.js?v=20261110d"></script>
-<script src="attach.js?v=20261110d"></script>
+<script src="data.js?v=20261110e"></script>
+<script src="attach.js?v=20261110e"></script>
 <script>
 (() => {
   const $ = (s) => document.querySelector(s);
@@ -644,9 +674,16 @@
     updateBar();
   }
 
-  function redraw(x, focusSel) {
+  function redraw(x, focusSel, fx) {
     const el = document.querySelector(`.item[data-id="${x.id}"]`);
+    const wasOn = el.classList.contains("on") || el.dataset.on === "1";
     el.outerHTML = itemHtml(x);
+    const card = document.querySelector(`.item[data-id="${x.id}"]`);
+    if (card) {
+      if (x.on !== wasOn) card.classList.add(x.on ? "fx-on" : "fx-off");
+      if (fx === "mihon") card.querySelector(".mchip")?.classList.add("fx");
+      if (fx === "minus" || fx === "plus") card.querySelector(".stepper output")?.classList.add("fx");
+    }
     const again = document.querySelector(`.item[data-id="${x.id}"]` + (focusSel ? " " + focusSel : ""));
     if (again) again.focus();
     updateBar();
@@ -655,7 +692,12 @@
   function updateBar() {
     const sel = withMihon(selected());
     const n = sel.reduce((a, x) => a + x.copies, 0);
-    $("#count").innerHTML = sel.length ? `<strong>${sel.length}</strong>種類・計<strong>${n}</strong>部` : "印刷する書類を選んでください";
+    const html = sel.length ? `<strong>${sel.length}</strong>種類・計<strong>${n}</strong>部` : "印刷する書類を選んでください";
+    const cnt = $("#count");
+    if (cnt.innerHTML !== html) {
+      cnt.innerHTML = html;
+      cnt.classList.remove("fx"); void cnt.offsetWidth; cnt.classList.add("fx");
+    }
     $("#go").disabled = !sel.length;
     $("#clear").disabled = !sel.length;
   }
@@ -673,11 +715,22 @@
       if (act === "mihon") { x.withMihon = !x.withMihon; if (x.withMihon) x.on = true; }
       if (act === "minus") x.copies = Math.max(1, x.copies - 1);
       if (act === "plus") { x.copies = Math.min(20, x.copies + 1); x.on = true; }
-      redraw(x, `[data-act="${act}"]`);
+      redraw(x, `[data-act="${act}"]`, act);
       return;
     }
     x.on = !x.on;
     redraw(x);
+  });
+  // 印刷・解除ボタンを押した場所から波紋が広がる
+  document.addEventListener("pointerdown", (e) => {
+    const b = e.target.closest(".go, .clear");
+    if (!b || b.disabled || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const r = b.getBoundingClientRect(), d = Math.max(r.width, r.height);
+    const sp = document.createElement("span");
+    sp.className = "ripple";
+    sp.style.cssText = `width:${d}px;height:${d}px;left:${e.clientX - r.left - d / 2}px;top:${e.clientY - r.top - d / 2}px`;
+    b.appendChild(sp);
+    sp.addEventListener("animationend", () => sp.remove());
   });
   $("#main").addEventListener("keydown", (e) => {
     const card = e.target.closest(".item");
