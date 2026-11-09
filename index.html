@@ -280,7 +280,7 @@
 </head>
 <body>
 
-<header><h1 id="title">書類印刷</h1><span class="ver">最終更新 11/9 15:30</span></header>
+<header><h1 id="title">書類印刷</h1><span class="ver">最終更新 11/9 15:45</span></header>
 <main>
   <section class="att" id="att" hidden>
     <h2>添付書類</h2>
@@ -358,8 +358,8 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="peek" id="peek" aria-hidden="true"></div>
 
-<script src="data.js?v=20261109o"></script>
-<script src="attach.js?v=20261109o"></script>
+<script src="data.js?v=20261109p"></script>
+<script src="attach.js?v=20261109p"></script>
 <script>
 (() => {
   const $ = (s) => document.querySelector(s);
@@ -593,7 +593,7 @@
           </div>
           <button class="one" data-act="print" ${file ? "" : "disabled"}>印刷</button>
         </div>
-        ${chosen(x).note ? `<div class="pick-note${/原本/.test(chosen(x).note) && !/原本またはコピー/.test(chosen(x).note) ? " gen" : ""}">${esc(chosen(x).note)}（念のため確認してください）</div>` : ""}
+        ${chosen(x).note ? `<div class="pick-note${/原本/.test(chosen(x).note) && !/原本またはコピー/.test(chosen(x).note) ? " gen" : ""}">${esc(chosen(x).note)}</div>` : ""}
       </div>`;
     }
     if (!x.file && !x.obtain) {
