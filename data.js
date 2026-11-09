@@ -84,7 +84,7 @@ const SECTIONS = [
     ],
   },
   {
-    title: "書類",
+    title: "名義変更の書類",
     items: [
       // mihon … 書類と一緒に印刷できる書き方見本（カードに「見本」ボタンが付きます）
       // mihonName … 印刷順（PRINT_ORDER）で使う見本の名前
@@ -94,6 +94,12 @@ const SECTIONS = [
         { name: "法人", file: "ininjo.pdf", mihon: "mihon-ininjo-houjin.jpg", mihonName: "委任状（法人）（見本）" },
       ] },
       { name: "譲渡証明書",             file: "joto.pdf",           mihon: "mihon-joto.jpg",           mihonName: "譲渡証明書（見本）" },
+      { name: "所有権解除依頼書",       file: "shoyuken-kaijo.pdf", mihon: "mihon-shoyuken-kaijo.png", mihonName: "所有権解除依頼書（見本）" },
+    ],
+  },
+  {
+    title: "車庫証明の書類",
+    items: [
       { name: "車庫申請書（1枚のみ）",   file: "shako-shinsei.pdf" },
       { name: "自認書",                 file: "jinin.pdf",          mihon: "mihon-jinin.jpg",          mihonName: "自認書（見本）" },
       { name: "配置図", choices: [
@@ -101,7 +107,6 @@ const SECTIONS = [
         { name: "離れてる場合", file: "haichizu.pdf", mihon: "mihon-haichizu-hanare.jpg", mihonName: "配置図（離れてる場合）（見本）" },
       ] },
       { name: "保管場所使用承諾証明書", file: "shodaku.pdf",        mihon: "mihon-shodaku.jpg",        mihonName: "保管場所使用承諾証明書（見本）" },
-      { name: "所有権解除依頼書",       file: "shoyuken-kaijo.pdf", mihon: "mihon-shoyuken-kaijo.png", mihonName: "所有権解除依頼書（見本）" },
     ],
   },
   {
