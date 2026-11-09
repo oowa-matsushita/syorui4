@@ -342,8 +342,8 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="peek" id="peek" aria-hidden="true"></div>
 
-<script src="data.js?v=20261109e"></script>
-<script src="attach.js?v=20261109e"></script>
+<script src="data.js?v=20261109f"></script>
+<script src="attach.js?v=20261109f"></script>
 <script>
 (() => {
   const $ = (s) => document.querySelector(s);
@@ -745,7 +745,7 @@
       g.lineWidth = 1; g.strokeRect(L + 6, y + 11, 16, 16);
       if (r) {
         text(r.name, L + 44, y + 25, 14, true);
-        text(`${r.copies}部`, Rt - 10, y + 25, 12, false, "right");
+        text(`${r.copies}部`, Rt - 50, y + 25, 12, false, "center");   // 部数の位置
       }
       y += rowH; line(L, y, Rt, y);
     };
@@ -755,7 +755,7 @@
       y += 22;
       g.fillStyle = "#000"; g.fillRect(L, y - 13, 4, 17);
       text(grp, L + 12, y, 13, true);
-      text("部数", Rt - 10, y, 9, false, "right");
+      text("部数", Rt - 50, y, 9, false, "center");
       y += 8; line(L, y, Rt, y, 1.4);
       list.forEach(row);
       y += 6;
