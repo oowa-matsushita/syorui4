@@ -352,8 +352,8 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="peek" id="peek" aria-hidden="true"></div>
 
-<script src="data.js?v=20261109m"></script>
-<script src="attach.js?v=20261109m"></script>
+<script src="data.js?v=20261109n"></script>
+<script src="attach.js?v=20261109n"></script>
 <script>
 (() => {
   const $ = (s) => document.querySelector(s);
@@ -587,7 +587,7 @@
           </div>
           <button class="one" data-act="print" ${file ? "" : "disabled"}>印刷</button>
         </div>
-        ${chosen(x).note ? `<div class="pick-note${/原本/.test(chosen(x).note) && !/原本またはコピー/.test(chosen(x).note) ? " gen" : ""}">${esc(chosen(x).note)}</div>` : ""}
+        ${chosen(x).note ? `<div class="pick-note${/原本/.test(chosen(x).note) && !/原本またはコピー/.test(chosen(x).note) ? " gen" : ""}">${esc(chosen(x).note)}（念のため確認してください）</div>` : ""}
       </div>`;
     }
     if (!x.file && !x.obtain) {
