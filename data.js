@@ -121,6 +121,7 @@ const SECTIONS = [
   },
   {
     title: "書き方見本",
+    sub: true,          // すぐ上の「車庫証明の書類」の中の小見出しとして表示する
     checklist: false,   // 頭紙のチェックリストには載せない
     items: [
       { name: "車庫証明（4枚一式）",   file: "mihon-shako.jpg" },

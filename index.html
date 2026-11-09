@@ -40,6 +40,9 @@
 
   main { max-width: 1080px; margin: 0 auto; padding: 8px 24px 24px; }
   section { margin-top: 24px; }
+  /* 小見出しの欄（上の欄の中に入っているように見せる） */
+  section.subsec { margin-top: 12px; padding-left: 14px; border-left: 3px solid var(--line); }
+  section.subsec h3 { font-size: .85rem; color: var(--muted); margin: 0 0 8px; font-weight: 700; letter-spacing: .04em; }
   section h2 {
     font-size: .95rem; margin: 0 0 10px; padding-bottom: 6px;
     border-bottom: 1px solid var(--ink); letter-spacing: .04em;
@@ -280,7 +283,7 @@
 </head>
 <body>
 
-<header><h1 id="title">書類印刷</h1><span class="ver">最終更新 11/9 16:00</span></header>
+<header><h1 id="title">書類印刷</h1><span class="ver">最終更新 11/9 16:15</span></header>
 <main>
   <section class="att" id="att" hidden>
     <h2>添付書類</h2>
@@ -358,8 +361,8 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="peek" id="peek" aria-hidden="true"></div>
 
-<script src="data.js?v=20261109p"></script>
-<script src="attach.js?v=20261109p"></script>
+<script src="data.js?v=20261109q"></script>
+<script src="attach.js?v=20261109q"></script>
 <script>
 (() => {
   const $ = (s) => document.querySelector(s);
@@ -618,8 +621,8 @@
 
   function render() {
     $("#main").innerHTML = SECTIONS.map((sec) => `
-      <section>
-        <h2>${esc(sec.title)}</h2>
+      <section class="${sec.sub ? "subsec" : ""}">
+        ${sec.sub ? `<h3>${esc(sec.title)}</h3>` : `<h2>${esc(sec.title)}</h2>`}
         <div class="grid">${items.filter((x) => x.sec === sec.title).map(itemHtml).join("")}</div>
         ${sec.note ? `<ul class="note">${[].concat(sec.note).map((t) => `<li>${esc(t)}</li>`).join("")}</ul>` : ""}
       </section>`).join("");
