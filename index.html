@@ -89,6 +89,9 @@
     border: solid #fff; border-width: 0 3px 3px 0; transform: rotate(45deg);
   }
   .one { white-space: nowrap; }
+  /* 書類の中のプルダウン（委任状の個人／法人）は名前の横に小さく並べ、カードの高さをそろえる */
+  .pick.inline { flex-wrap: nowrap; gap: 8px; }
+  .pick.inline select { min-width: 0; width: 5.2em; padding: 4px 4px; font-size: .95rem; }
   .pick select {
     font: inherit; font-size: 1rem; color: var(--ink); background: var(--sheet);
     border: 2px solid var(--ink); border-radius: 5px; padding: 6px 8px; min-width: 9em;
@@ -339,8 +342,8 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="peek" id="peek" aria-hidden="true"></div>
 
-<script src="data.js?v=20261109d"></script>
-<script src="attach.js?v=20261109d"></script>
+<script src="data.js?v=20261109e"></script>
+<script src="attach.js?v=20261109e"></script>
 <script>
 (() => {
   const $ = (s) => document.querySelector(s);
@@ -545,7 +548,7 @@
       });
       return `<div class="item ${x.on ? "on" : ""}" data-id="${x.id}">
         <span class="mark" aria-hidden="true"></span>
-        <div class="pick">
+        <div class="pick ${x.key ? "inline" : ""}">
           <span class="name">${esc(x.name)}</span>
           <select data-act="pick" aria-label="${esc(x.name)}を選ぶ">
             ${groups.map((gr) => gr.g ? `<optgroup label="${esc(gr.g)}">${gr.opts.join("")}</optgroup>` : gr.opts.join("")).join("")}
