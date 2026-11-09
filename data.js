@@ -36,7 +36,8 @@ const PRINT_ORDER = [
   "委任状（個人）（見本）",
   "委任状（法人）（見本）",
   "譲渡証明書",
-  "譲渡証明書（見本）",
+  "譲渡証明書（個人）（見本）",
+  "譲渡証明書（法人）（見本）",
   "所有権解除依頼書",
   "所有権解除依頼書（見本）",
   "還付書類",                    // 都道府県のプルダウン
@@ -103,7 +104,10 @@ const SECTIONS = [
         { name: "個人", file: "ininjo.pdf", mihon: "mihon-ininjo.jpg",        mihonName: "委任状（個人）（見本）" },
         { name: "法人", file: "ininjo.pdf", mihon: "mihon-ininjo-houjin.jpg", mihonName: "委任状（法人）（見本）" },
       ] },
-      { name: "譲渡証明書",             file: "joto.pdf",           mihon: "mihon-joto.jpg",           mihonName: "譲渡証明書（見本）" },
+      { name: "譲渡証明書", choices: [
+        { name: "個人", file: "joto.pdf", mihon: "mihon-joto.jpg",        mihonName: "譲渡証明書（個人）（見本）" },
+        { name: "法人", file: "joto.pdf", mihon: "mihon-joto-houjin.jpg", mihonName: "譲渡証明書（法人）（見本）" },
+      ] },
       { name: "所有権解除依頼書",       file: "shoyuken-kaijo.pdf", mihon: "mihon-shoyuken-kaijo.png", mihonName: "所有権解除依頼書（見本）" },
     ],
   },
