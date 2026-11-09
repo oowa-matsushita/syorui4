@@ -34,6 +34,8 @@ const PRINT_ORDER = [
   "振込口座記入用紙",
   "委任状",
   "委任状（見本）",
+  "委任状（法人）",
+  "委任状（法人）（見本）",
   "譲渡証明書",
   "譲渡証明書（見本）",
   "所有権解除依頼書",
@@ -85,6 +87,7 @@ const SECTIONS = [
       // mihon … 書類と一緒に印刷できる書き方見本（カードに「見本」ボタンが付きます）
       // mihonName … 印刷順（PRINT_ORDER）で使う見本の名前
       { name: "委任状",                 file: "ininjo.pdf",         mihon: "mihon-ininjo.jpg",         mihonName: "委任状（見本）" },
+      { name: "委任状（法人）",         file: "ininjo.pdf",         mihon: "mihon-ininjo-houjin.jpg",  mihonName: "委任状（法人）（見本）" },
       { name: "譲渡証明書",             file: "joto.pdf",           mihon: "mihon-joto.jpg",           mihonName: "譲渡証明書（見本）" },
       { name: "車庫申請書（1枚のみ）",   file: "shako-shinsei.pdf" },
       { name: "自認書",                 file: "jinin.pdf",          mihon: "mihon-jinin.jpg",          mihonName: "自認書（見本）" },
