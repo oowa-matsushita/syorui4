@@ -94,6 +94,7 @@
   .pick-note.gen { color: var(--shu); font-weight: 700; background: #FBEDEB; }
   /* 書類の中のプルダウン（委任状の個人／法人）は名前の横に小さく並べ、カードの高さをそろえる */
   .pick.inline { flex-wrap: nowrap; gap: 8px; }
+  .pick.inline .name, .mchip { white-space: nowrap; }
   .pick.inline select { min-width: 0; width: auto; padding: 4px 4px; font-size: .95rem; }
   .pick select {
     font: inherit; font-size: 1rem; color: var(--ink); background: var(--sheet);
@@ -266,6 +267,9 @@
     .item.wide { grid-template-columns: auto 1fr; row-gap: 10px; }
     .item.wide .pick.grow select { min-width: 0; width: 100%; max-width: none; }
     .item.wide .ctrl { grid-column: 1 / -1; justify-content: flex-end; }
+    /* プルダウン付きのカードは、スマホでは操作ボタンを下の段に回す */
+    .item:has(.pick.inline) { grid-template-columns: auto 1fr; row-gap: 10px; }
+    .item:has(.pick.inline) .ctrl { grid-column: 1 / -1; justify-content: flex-end; }
     header { padding-left: 14px; padding-right: 14px; }
     .grid { grid-template-columns: 1fr; }
   }
@@ -352,8 +356,8 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="peek" id="peek" aria-hidden="true"></div>
 
-<script src="data.js?v=20261109n"></script>
-<script src="attach.js?v=20261109n"></script>
+<script src="data.js?v=20261109o"></script>
+<script src="attach.js?v=20261109o"></script>
 <script>
 (() => {
   const $ = (s) => document.querySelector(s);
@@ -572,7 +576,7 @@
       });
       return `<div class="item ${x.on ? "on" : ""}" data-id="${x.id}">
         <span class="mark" aria-hidden="true"></span>
-        <div class="pick ${x.key ? "inline" : ""}">
+        <div class="pick inline">
           <span class="name">${esc(x.name)}</span>
           <select data-act="pick" aria-label="${esc(x.name)}を選ぶ">
             ${groups.map((gr) => gr.g ? `<optgroup label="${esc(gr.g)}">${gr.opts.join("")}</optgroup>` : gr.opts.join("")).join("")}
