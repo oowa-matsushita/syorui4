@@ -21,7 +21,7 @@ const COVER = {
   groupMain: "ご返送いただく書類",            // coverGroup の指定がない書類と、上の車庫証明はこちら
   groupObtain: "役所などで取得いただく書類",   // 「役所などで取得」の欄はこちら
   // 「車庫証明はお客様出し」＝はい のとき、返送リストに載せない書類（画面の名前で指定）
-  garageHide: ["車庫申請書（1枚のみ）", "配置図", "自認書", "保管場所使用承諾証明書"],
+  garageHide: ["車庫申請書（1枚のみ）", "配置図（敷地内）", "配置図（離れてる場合）", "自認書", "保管場所使用承諾証明書"],
 };
 
 // =====================================================================
@@ -32,9 +32,8 @@ const COVER = {
 const PRINT_ORDER = [
   "添付書類",                    // 添付書類（ご案内文）
   "振込口座記入用紙",
-  "委任状",
-  "委任状（見本）",
-  "委任状（法人）",
+  "委任状",                      // 個人・法人のプルダウン
+  "委任状（個人）（見本）",
   "委任状（法人）（見本）",
   "譲渡証明書",
   "譲渡証明書（見本）",
@@ -42,10 +41,13 @@ const PRINT_ORDER = [
   "所有権解除依頼書（見本）",
   "還付書類",                    // 都道府県のプルダウン
   "還付書類（静岡県）（見本）",
+  "還付書類（愛知県）（見本）",
   "車庫証明の提出の仕方",
   "車庫申請書（1枚のみ）",
-  "配置図",
-  "配置図 個人宅（見本）",
+  "配置図（敷地内）",
+  "配置図（敷地内）（見本）",
+  "配置図（離れてる場合）",
+  "配置図（離れてる場合）（見本）",
   "自認書",
   "車庫証明（4枚一式）",
   "自認書（見本）",
@@ -87,12 +89,16 @@ const SECTIONS = [
     items: [
       // mihon … 書類と一緒に印刷できる書き方見本（カードに「見本」ボタンが付きます）
       // mihonName … 印刷順（PRINT_ORDER）で使う見本の名前
-      { name: "委任状",                 file: "ininjo.pdf",         mihon: "mihon-ininjo.jpg",         mihonName: "委任状（見本）" },
-      { name: "委任状（法人）",         file: "ininjo.pdf",         mihon: "mihon-ininjo-houjin.jpg",  mihonName: "委任状（法人）（見本）" },
+      // choices … カードの中のプルダウン。頭紙には「委任状（個人）」のように載ります
+      { name: "委任状", choices: [
+        { name: "個人", file: "ininjo.pdf", mihon: "mihon-ininjo.jpg",        mihonName: "委任状（個人）（見本）" },
+        { name: "法人", file: "ininjo.pdf", mihon: "mihon-ininjo-houjin.jpg", mihonName: "委任状（法人）（見本）" },
+      ] },
       { name: "譲渡証明書",             file: "joto.pdf",           mihon: "mihon-joto.jpg",           mihonName: "譲渡証明書（見本）" },
       { name: "車庫申請書（1枚のみ）",   file: "shako-shinsei.pdf" },
       { name: "自認書",                 file: "jinin.pdf",          mihon: "mihon-jinin.jpg",          mihonName: "自認書（見本）" },
-      { name: "配置図",                 file: "haichizu.pdf",       mihon: "mihon-haichizu.jpg",       mihonName: "配置図 個人宅（見本）" },
+      { name: "配置図（敷地内）",       file: "haichizu.pdf",       mihon: "mihon-haichizu.jpg",       mihonName: "配置図（敷地内）（見本）" },
+      { name: "配置図（離れてる場合）", file: "haichizu.pdf",       mihon: "mihon-haichizu-hanare.jpg", mihonName: "配置図（離れてる場合）（見本）" },
       { name: "保管場所使用承諾証明書", file: "shodaku.pdf",        mihon: "mihon-shodaku.jpg",        mihonName: "保管場所使用承諾証明書（見本）" },
       { name: "所有権解除依頼書",       file: "shoyuken-kaijo.pdf", mihon: "mihon-shoyuken-kaijo.png", mihonName: "所有権解除依頼書（見本）" },
     ],
@@ -111,7 +117,7 @@ const SECTIONS = [
     selectLabel: "還付書類",           // カードに表示する名前
     listName: "還付書類（{name}）",    // チェックリストでの表示名
     items: [
-      { group: "東海・北陸・近畿", name: "愛知県",   file: "kanpu-aichi.pdf" },
+      { group: "東海・北陸・近畿", name: "愛知県",   file: "kanpu-aichi.pdf", mihon: "mihon-kanpu-aichi.jpg", mihonName: "還付書類（愛知県）（見本）" },
       { group: "東海・北陸・近畿", name: "静岡県",   file: "kanpu-shizuoka.pdf", default: true, mihon: "mihon-kanpu-shizuoka.jpg", mihonName: "還付書類（静岡県）（見本）" },   // 最初に選ばれる県
       { group: "東海・北陸・近畿", name: "三重県",   file: "kanpu-mie.pdf" },
       { group: "東海・北陸・近畿", name: "岐阜県",   file: "kanpu-gifu.pdf" },

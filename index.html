@@ -339,8 +339,8 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="peek" id="peek" aria-hidden="true"></div>
 
-<script src="data.js?v=20261109b"></script>
-<script src="attach.js?v=20261109b"></script>
+<script src="data.js?v=20261109c"></script>
+<script src="attach.js?v=20261109c"></script>
 <script>
 (() => {
   const $ = (s) => document.querySelector(s);
@@ -371,8 +371,14 @@
       });
       return;
     }
-    sec.items.forEach((it, ii) =>
-      items.push({
+    sec.items.forEach((it, ii) => it.choices
+      // 書類の中のプルダウン（例：委任状 → 個人／法人）
+      ? items.push({
+        id: si + "-" + ii, sec: sec.title, key: it.name, name: it.name, on: false, copies: 1,
+        inList: sec.checklist !== false, choices: it.choices, pick: 0, withMihon: false,
+        tmpl: it.listName || it.name + "（{name}）",
+      })
+      : items.push({
         id: si + "-" + ii, sec: sec.title, name: it.name, file: it.file, on: false, copies: 1,
         mihon: it.mihon, mihonName: it.mihonName || it.name + "（見本）", withMihon: false,
         inList: sec.checklist !== false,
@@ -672,7 +678,7 @@
   // data.js の PRINT_ORDER の順に並べ替える
   function sortForPrint(list) {
     const order = (typeof PRINT_ORDER !== "undefined" ? PRINT_ORDER : []);
-    const keyOf = (x) => (x.attach || x.choices || x.text ? x.sec : x.name);
+    const keyOf = (x) => (x.key || (x.attach || x.choices || x.text ? x.sec : x.name));
     const rank = (x) => {
       const i = order.indexOf(keyOf(x));
       return i < 0 ? order.length + items.indexOf(x) : i;
