@@ -219,7 +219,7 @@
   .att-texts { display: grid; gap: 6px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
   .att-texts .chip { justify-content: flex-start; }
   .att-texts .g { font-size: .75rem; color: var(--muted); font-weight: 400; border: 1px solid var(--line); border-radius: 3px; padding: 0 5px; white-space: nowrap; }
-  .att-prev { margin-top: 16px; }
+  .att-prev { margin-top: 0; }
   .att-prev summary {
     list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
     height: 44px; padding: 0 18px; border: 2px solid var(--ink); border-radius: 5px;
@@ -243,9 +243,13 @@
   }
   .att-title { text-align: center; font-weight: 700; font-size: 1.15rem; letter-spacing: .08em; margin-bottom: 12px; }
   .att-title:empty { display: none; }
+  .att-foot .sig { display: flex; justify-content: space-between; text-align: left; gap: 16px; }
+  .att-foot .sig div + div { text-align: right; }
   .att-paper [hidden] { display: none !important; }
   .att-foot { margin-top: 12px; padding-top: 8px; border-top: 1px solid var(--line); font-size: .8rem; text-align: center; color: var(--muted); line-height: 1.6; }
-  .att-edit-btns { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 10px; }
+  /* 編集ボタンは「印刷される文章を確認」の右に並べる（位置はJSで summary の幅に合わせる） */
+  .att-prev-wrap { position: relative; margin-top: 16px; }
+  .att-edit-btns { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; position: absolute; top: 0; left: 260px; height: 44px; }
   .att-edit-btns .one { height: 44px; padding: 0 22px; font-size: 1rem; }
   .att-edited { font-size: .85rem; color: var(--shu); }
   .att-btns { display: flex; align-items: center; gap: 14px; margin-top: 14px; flex-wrap: wrap; }
@@ -255,6 +259,7 @@
     main { padding: 4px 14px 20px; }
     .att-row { grid-template-columns: 1fr; gap: 6px; }
     .att-texts { grid-template-columns: 1fr; }
+    .att-edit-btns { position: static; height: auto; margin-top: 10px; }
     .item.wide { grid-template-columns: auto 1fr; row-gap: 10px; }
     .item.wide .pick.grow select { min-width: 0; width: 100%; max-width: none; }
     .item.wide .ctrl { grid-column: 1 / -1; justify-content: flex-end; }
@@ -296,6 +301,7 @@
         <span class="att-lbl">自由記載</span>
         <textarea id="attFree" rows="4" placeholder="ここに書いた文章も印刷されます"></textarea>
       </div>
+      <div class="att-prev-wrap">
       <details class="att-prev" id="attPrevBox"><summary>印刷される文章を確認</summary>
         <div class="att-paper">
           <div class="att-title" id="attTitle"></div>
@@ -308,6 +314,7 @@
         <button class="one" id="attEditBtn">編集</button>
         <button class="ed-reset" id="attReset" hidden>元の文章に戻す</button>
         <span class="att-edited" id="attEdited" hidden>編集済み：上の選択を変えても、この文章には反映されません。</span>
+      </div>
       </div>
       <div class="att-btns">
         <button class="att-save" id="attSave">保存</button>
@@ -342,8 +349,8 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="peek" id="peek" aria-hidden="true"></div>
 
-<script src="data.js?v=20261109h"></script>
-<script src="attach.js?v=20261109h"></script>
+<script src="data.js?v=20261109i"></script>
+<script src="attach.js?v=20261109i"></script>
 <script>
 (() => {
   const $ = (s) => document.querySelector(s);
@@ -419,24 +426,33 @@
     const cust = att.cust.trim().replace(/\s*様$/, "");   // 「様」を二重に付けない
     if (cust) blocks.push(cust + "様");
     blocks.push(A.greeting.join("\n").replace(/\{name\}/g, att.staff));
-    A.texts.filter((t) => att.picks.includes(t.name)).forEach((t) => blocks.push(t.text.trim()));
+    // 選んだ文章は分類（group）ごとに見出しを付けてまとめる
+    const picked = A.texts.filter((t) => att.picks.includes(t.name));
+    [...new Set(picked.map((t) => t.group))].forEach((grp) => {
+      const head = (A.headings && A.headings[grp]) || grp;
+      blocks.push("■" + head + "\n" + picked.filter((t) => t.group === grp).map((t) => t.text.trim()).join("\n"));
+    });
     if (att.free.trim()) blocks.push(att.free.trim());
     const parts = [];
     const days = A.holidays.filter((d) => att.days.includes(d));
     if (days.length) parts.push("毎週" + days.map((d) => d + "曜日").join("・"));
     if (att.other && att.memo.trim()) parts.push(att.memo.trim());
-    if (parts.length) blocks.push(A.holidayLabel + parts.join("、") + (A.holidayNote ? "\n" + A.holidayNote : ""));
+    const staff = ["■" + (A.staffHeading || "担当者")];
+    if (att.staff) staff.push("担当　" + att.staff);
+    if (parts.length) staff.push(A.holidayLabel + parts.join("、") + (A.holidayNote ? "\n" + A.holidayNote : ""));
+    if (staff.length > 1) blocks.push(staff.join("\n"));
     if (A.closing) blocks.push(A.closing);
     return blocks.join("\n\n");
   }
 
   // 印刷する文章（編集していれば編集した文章）
   const attFinal = () => (att.custom != null ? att.custom : attText());
-  const attSig = () => (ATTACH.signature || []);
+  const attSig = () => ATTACH.signature || { left: [], right: [] };
 
   function attPreview() {
     $("#attPrev").textContent = attFinal();
-    $("#attFoot").innerHTML = attSig().map(esc).join("<br>");
+    const sg = attSig();
+    $("#attFoot").innerHTML = `<div class="sig"><div>${(sg.left || []).map(esc).join("<br>")}</div><div>${(sg.right || []).map(esc).join("<br>")}</div></div>`;
     $("#attTitle").textContent = ATTACH.title || "";
     const edited = att.custom != null;
     $("#attReset").hidden = !edited;
@@ -496,6 +512,11 @@
       attPreview();
     });
     $("#attEditBtn").addEventListener("click", () => attEditMode(!attEditing));
+    // 編集ボタンを「印刷される文章を確認」のすぐ右に置く
+    const sum = $("#attPrevBox summary");
+    const placeEdit = () => { $(".att-edit-btns").style.left = (sum.offsetWidth + 12) + "px"; };
+    if (window.ResizeObserver) new ResizeObserver(placeEdit).observe(sum);
+    placeEdit();
     $("#attEdit").addEventListener("input", (e) => { e.stopPropagation(); att.custom = e.target.value; attPreview(); });
     $("#attReset").addEventListener("click", () => {
       delete att.custom;
@@ -715,76 +736,152 @@
     printItems(docs, cover);
   }
 
-  // A4縦の頭紙を画像として描く（日本語フォントをPDFに埋め込まずに済むため）
-  async function drawCover(rows, notes) {
-    const F = '"BIZ UDPGothic", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif';
+  // ---------- 印刷デザイン（添付書類・頭紙で共通） ----------
+  // A4縦をpt単位で描き、2.5倍の画像にしてPDFに貼る（日本語フォントをPDFに埋め込まずに済むため）
+  const PF = '"BIZ UDPGothic", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif';
+  const PW = 595.28, PH = 841.89, PL = 56, PR = PW - 56;
+  async function newSheet() {
     try { await Promise.all([document.fonts.load(`700 20px "BIZ UDPGothic"`), document.fonts.load(`400 20px "BIZ UDPGothic"`)]); } catch (_) {}
-    const S = 2.5, W = 595.28, H = 841.89;          // pt単位で描いて S 倍で出力
-    const c = document.createElement("canvas");
-    c.width = Math.round(W * S); c.height = Math.round(H * S);
+    const S = 2.5, c = document.createElement("canvas");
+    c.width = Math.round(PW * S); c.height = Math.round(PH * S);
     const g = c.getContext("2d");
     g.scale(S, S);
-    g.fillStyle = "#fff"; g.fillRect(0, 0, W, H);
+    g.fillStyle = "#fff"; g.fillRect(0, 0, PW, PH);
     g.fillStyle = "#000"; g.strokeStyle = "#000"; g.textBaseline = "alphabetic";
-    const L = 56, Rt = W - 56;
-    const text = (t, x, y, size, bold, align) => {
-      g.font = `${bold ? 700 : 400} ${size}px ${F}`; g.textAlign = align || "left"; g.fillText(t, x, y);
+    const text = (t, x, y, size, bold, align, color) => {
+      g.font = `${bold ? 700 : 400} ${size}px ${PF}`; g.textAlign = align || "left";
+      g.fillStyle = color || "#000"; g.fillText(t, x, y); g.fillStyle = "#000";
     };
-    const line = (x1, y1, x2, y2, w) => { g.lineWidth = w || 0.8; g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke(); };
+    const line = (x1, y1, x2, y2, w, color) => {
+      g.lineWidth = w || 0.8; g.strokeStyle = color || "#000";
+      g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke(); g.strokeStyle = "#000";
+    };
+    const wrap = (t, size, bold, maxW) => {
+      g.font = `${bold ? 700 : 400} ${size}px ${PF}`;
+      const out = []; let cur = "";
+      const noStart = "、。，．・：；？！）」』】〕ー～…";   // 行の頭に来ないようにする文字
+      for (const ch of String(t)) {
+        if (g.measureText(cur + ch).width > maxW && cur && !noStart.includes(ch)) { out.push(cur); cur = ch; } else cur += ch;
+      }
+      out.push(cur);
+      return out;
+    };
+    const png = () => new Promise((res) => c.toBlob((b) => b.arrayBuffer().then(res), "image/png"));
+    return { g, text, line, wrap, png };
+  }
+  // タイトル（左寄せ）と、その下の細い線
+  function sheetTitle(s, title) {
+    s.text(title, PL, 92, 21, true);
+    s.line(PL, 110, PR, 110, 0.8);
+  }
+  // ページの一番下の会社情報（左：社名・住所／右：電話・メール）
+  const FOOT_TOP = PH - 84;
+  function sheetFooter(s) {
+    const sg = (typeof ATTACH !== "undefined" && ATTACH.signature) || null;
+    if (!sg) return;
+    s.line(PL, FOOT_TOP, PR, FOOT_TOP, 0.8);
+    (sg.left || []).forEach((t, i) => s.text(t, PL, FOOT_TOP + 20 + i * 15, i ? 8.5 : 10, !i));
+    (sg.right || []).forEach((t, i) => s.text(t, PR, FOOT_TOP + 20 + i * 15, 8.5, false, "right"));
+  }
 
-    text(COVER.title, W / 2, 100, 22, true, "center");
-    line(L, 116, Rt, 116, 1.5);
-    text(COVER.message, L, 156, 11, false);
+  // 添付書類：■で始まる行は見出し、最初の「〜様」は宛名として印字
+  async function attPages(text) {
+    const SIZE = 10.5, LH = 17.5, maxW = PR - PL;
+    const probe = await newSheet();
+    const items = [];
+    let first = true;
+    String(text).split("\n").forEach((src) => {
+      const t = src.replace(/\s+$/, "");
+      if (!t) { items.push({ kind: "gap", h: LH * 0.5 }); return; }
+      if (first && /様$/.test(t)) { items.push({ kind: "to", t, h: 38 }); first = false; return; }
+      first = false;
+      if (t.startsWith("■")) { items.push({ kind: "head", t: t.slice(1).trim(), h: 30 }); return; }
+      probe.wrap(t, SIZE, false, maxW).forEach((ln) => items.push({ kind: "body", t: ln, h: LH }));
+    });
+    // 見出しの直前の空行は少し広げる
+    items.forEach((it, i) => { if (it.kind === "head" && items[i - 1] && items[i - 1].kind === "gap") items[i - 1].h = 12; });
 
-    // 表（見出しごとに分けて載せる。「ご返送いただく書類」が先）
-    let y = 172;
-    const rowH = 38;
+    const pages = [];
+    const bottom = FOOT_TOP - 24;
+    let s = null, y = 0;
+    const start = async () => {
+      if (s) { sheetFooter(s); pages.push(await s.png()); }
+      s = await newSheet();
+      if (!pages.length && ATTACH.title) { sheetTitle(s, ATTACH.title); y = 142; } else y = 70;
+    };
+    await start();
+    for (let i = 0; i < items.length; i++) {
+      const it = items[i];
+      // 見出しだけがページの最後に残らないように
+      const need = it.kind === "head" ? it.h + LH * 2 : it.h;
+      if (y + need > bottom) { await start(); if (it.kind === "gap") continue; }
+      if (it.kind === "to") {
+        s.text(it.t, PL, y + 4, 15, true);
+        s.g.font = `700 15px ${PF}`;
+        const w = Math.max(s.g.measureText(it.t).width + 40, 190);
+        s.line(PL, y + 12, PL + w, y + 12, 0.8);
+      } else if (it.kind === "head") {
+        s.text("■ " + it.t, PL, y + 14, 11.5, true);
+        s.line(PL, y + 21, PR, y + 21, 0.5, "#888");
+      } else if (it.kind === "body") {
+        s.text(it.t, PL, y + 13, SIZE, false);
+      }
+      y += it.h;
+    }
+    sheetFooter(s);
+    pages.push(await s.png());
+    return pages;
+  }
+
+  // 頭紙（返送書類チェックリスト）
+  async function drawCover(rows, notes) {
+    const s = await newSheet();
+    sheetTitle(s, COVER.title);
+    let y = 142;
+    s.text(COVER.message, PL, y, 10.5, false);
+    y += 18;
+
+    const CNT = PR - 46;   // 部数の位置
+    const rowH = 34;
+    const row = (r) => {
+      s.g.lineWidth = 1; s.g.strokeRect(PL + 4, y + 11, 13, 13);
+      if (r) {
+        s.text(r.name, PL + 30, y + 23, 12, true);
+        s.text(`${r.copies}部`, CNT, y + 23, 11, false, "center");
+      }
+      y += rowH;
+      s.line(PL, y, PR, y, 0.5, "#999");
+    };
     const order = [...new Set([COVER.groupMain, COVER.groupObtain, COVER.groupSend].filter(Boolean))];
     rows.forEach((r) => { if (!order.includes(r.group)) order.push(r.group); });
-    const row = (r) => {
-      g.lineWidth = 1; g.strokeRect(L + 6, y + 11, 16, 16);
-      if (r) {
-        text(r.name, L + 44, y + 25, 14, true);
-        text(`${r.copies}部`, Rt - 50, y + 25, 12, false, "center");   // 部数の位置
-      }
-      y += rowH; line(L, y, Rt, y);
-    };
     order.forEach((grp) => {
       const list = rows.filter((r) => r.group === grp);
       if (!list.length) return;
-      y += 22;
-      g.fillStyle = "#000"; g.fillRect(L, y - 13, 4, 17);
-      text(grp, L + 12, y, 13, true);
-      text("部数", Rt - 50, y, 9, false, "center");
-      y += 8; line(L, y, Rt, y, 1.4);
+      y += 30;
+      s.text(grp, PL, y, 12.5, true);
+      s.text("部数", CNT, y, 8.5, false, "center", "#666");
+      y += 8; s.line(PL, y, PR, y, 1.6);
       list.forEach(row);
-      y += 6;
     });
     if (COVER.blankRows) {
-      y += 10; line(L, y, Rt, y, 1.4);
+      y += 26;
+      s.line(PL, y, PR, y, 1.6);
       for (let i = 0; i < COVER.blankRows; i++) row(null);
     }
 
     // 注意文（選んだ書類に応じて表示）
     (notes || []).forEach((n) => {
-      g.font = `700 11.5px ${F}`;
-      const maxW = Rt - L - 28, lines = [];
-      let cur = "";
-      for (const ch of String(n)) {
-        if (g.measureText(cur + ch).width > maxW && cur) { lines.push(cur); cur = ch; }
-        else cur += ch;
-      }
-      lines.push(cur);
-      y += 26;
-      const boxH = 16 + lines.length * 19;
-      g.lineWidth = 1.2; g.strokeStyle = "#000";
-      g.strokeRect(L, y, Rt - L, boxH);
-      lines.forEach((ln, i) => text(ln, L + 14, y + 22 + i * 19, 11.5, true));
+      const lines = s.wrap(n, 11, true, PR - PL - 28);
+      y += 24;
+      const boxH = 14 + lines.length * 18;
+      s.g.lineWidth = 1.2; s.g.strokeStyle = "#000";
+      s.g.strokeRect(PL, y, PR - PL, boxH);
+      lines.forEach((ln, i) => s.text(ln, PL + 14, y + 20 + i * 18, 11, true));
       y += boxH;
     });
 
-    if (COVER.shop) text(COVER.shop, Rt, H - 60, 11, false, "right");
-    return new Promise((res) => c.toBlob((b) => b.arrayBuffer().then(res), "image/png"));
+    sheetFooter(s);
+    return s.png();
   }
 
   // ---------- 文章の編集 ----------
@@ -901,7 +998,7 @@
     const out = await PDFDocument.create();
     // 添付書類（ご案内文）は頭紙より前に入れる
     for (const x of list.filter((d) => d.attach)) {
-      const pages = await textPages(attFinal(), attSig(), ATTACH.title);
+      const pages = await attPages(attFinal());
       for (let c = 0; c < x.copies; c++) {
         for (const pb of pages) {
           const img = await out.embedPng(pb);
@@ -919,7 +1016,7 @@
     let added = 0;
     for (const x of list) {
       if (x.text || x.attach) {
-        const pages = await textPages(x.attach ? attFinal() : textOf(x), x.attach ? attSig() : [], x.attach ? ATTACH.title : "");
+        const pages = x.attach ? await attPages(attFinal()) : await textPages(textOf(x));
         for (let c = 0; c < x.copies; c++) {
           for (const pb of pages) {
             const img = await out.embedPng(pb);
