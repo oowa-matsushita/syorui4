@@ -501,8 +501,8 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="peek" id="peek" aria-hidden="true"></div>
 
-<script src="data.js?v=20261110n"></script>
-<script src="attach.js?v=20261110n"></script>
+<script src="data.js?v=20261110o"></script>
+<script src="attach.js?v=20261110o"></script>
 <script>
 (() => {
   const $ = (s) => document.querySelector(s);
@@ -1079,11 +1079,12 @@
     { id: "garage", q: (a) => a.kind ? "車庫証明をこちらで申請しますか？" : "車庫の届出（保管場所の届出）をこちらでしますか？" },
     { id: "onsite", q: "駐車場は、自宅の敷地内ですか？", when: (a) => a.garage },
     { id: "ownland", q: "駐車場の土地は、お客様ご本人のものですか？", hint: "ご家族名義の土地や、月極駐車場は「いいえ」", when: (a) => a.garage },
-    { id: "move", q: "引っ越しはありますか？", hint: "車検証や印鑑証明書の住所から、住所が変わっている場合は「はい」" },
-    { id: "move2", q: "引っ越しは2回以上ですか？", when: (a) => a.move },
-    { id: "rename", q: "名字の変更はありますか？", hint: "結婚などで名字が変わった場合は「はい」" },
-    { id: "buy", q: "最後に、買取車両（下取り車）はありますか？" },
-    { id: "lien", q: "買取車両の車検証の所有者は、ローン会社や販売店になっていますか？", hint: "車検証の「所有者」の欄を見てください", when: (a) => a.buy },
+    { id: "buy", q: "下取り車（買取車両）はありますか？" },
+    { id: "bkind", q: "下取り車は、普通車ですか？軽自動車ですか？", yes: "普通車", no: "軽自動車", when: (a) => a.buy },
+    { id: "lien", q: "下取り車の車検証の所有者は、ローン会社や販売店になっていますか？", hint: "車検証の「所有者」の欄を見てください", when: (a) => a.buy },
+    { id: "move", q: "下取り車の車検証の住所から、引っ越しはありますか？", hint: "車検証の住所と、今の住所が違う場合は「はい」", when: (a) => a.buy },
+    { id: "move2", q: "引っ越しは2回以上ですか？", when: (a) => a.buy && a.move },
+    { id: "rename", q: "下取り車の車検証から、名字の変更はありますか？", hint: "結婚などで名字が変わった場合は「はい」", when: (a) => a.buy },
   ];
   const wiz = $("#wiz");
   let wa = {}, wpath = [];
@@ -1099,11 +1100,11 @@
       add("配置図", a.onsite ? 0 : 1);
       add(a.ownland ? "自認書" : "保管場所使用承諾証明書");
     }
-    if (a.move) { add("住民票"); if (a.move2) add("戸籍の附票"); }
-    if (a.rename) add("戸籍謄本");
-    if (a.buy) {
-      add("印鑑証明書"); add("委任状", 0); add("譲渡証明書", 0); add("還付書類");
+    if (a.buy) {   // 下取り車の書類（下取りがなければ出さない）
+      if (a.bkind) { add("印鑑証明書"); add("委任状", 0); add("譲渡証明書", 0); add("還付書類"); }
       if (a.lien) add("所有権解除依頼書");
+      if (a.move) { add("住民票"); if (a.move2) add("戸籍の附票"); }
+      if (a.rename) add("戸籍謄本");
     }
     return r;
   }
@@ -1126,7 +1127,7 @@
     $("#wizBody").innerHTML = `<div class="wiz-q"><h3 id="wizQ">この書類にチェックを入れます</h3>
       <ul class="wiz-sum">${res.map(([n, p]) => { const x = items.find((y) => y.name === n);
         return `<li>${esc(label(n, p))}<small>${x && x.obtain ? "返送リストに載せる" : "印刷する"}</small></li>`; }).join("")}</ul>
-      ${wa.buy ? `<p class="wiz-note">還付書類は「${esc(chosen(items.find((y) => y.name === "還付書類")).name)}」になっています。買取車両の登録が別の県なら、カードのプルダウンで変えてください。</p>` : ""}
+      ${wa.buy && wa.bkind ? `<p class="wiz-note">還付書類は「${esc(chosen(items.find((y) => y.name === "還付書類")).name)}」になっています。買取車両の登録が別の県なら、カードのプルダウンで変えてください。</p>` : ""}
       ${!wa.kind && wa.garage ? `<p class="wiz-note">軽自動車の届出は、地域によって不要な場合があります。</p>` : ""}
       <div class="wiz-ans sum"><button data-v="apply">この内容でチェックする</button><button data-v="redo">最初からやり直す</button></div></div>`;
   }
