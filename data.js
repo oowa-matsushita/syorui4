@@ -146,7 +146,7 @@ const SECTIONS = [
     items: [
       { name: "車庫申請書（1枚のみ）",   file: "shako-shinsei.pdf" },
       { name: "自認書",                 file: "jinin.pdf",          mihon: "mihon-jinin.jpg",          mihonName: "自認書（見本）" },
-      { name: "配置図", choices: [
+      { name: "配置図", maker: true, choices: [   // maker: true … 住所から地図で作る ボタンを出す
         { name: "敷地内",       file: "haichizu.pdf", mihon: "mihon-haichizu.jpg",        mihonName: "配置図（敷地内）（見本）" },
         { name: "離れてる場合", file: "haichizu.pdf", mihon: "mihon-haichizu-hanare.jpg", mihonName: "配置図（離れてる場合）（見本）" },
       ] },
