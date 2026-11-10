@@ -288,6 +288,10 @@
   /* ---- 配置図を作る ---- */
   #maker { width: min(96vw, 1100px); max-height: 94vh; overflow: auto; padding: 18px 20px 0; }
   #maker .mk-hanare[hidden] { display: none; }
+  .mk-kind { display: flex; align-items: center; gap: 8px; margin: 0 0 14px; flex-wrap: wrap; }
+  .mk-kind span { font-weight: 700; font-size: .9rem; margin-right: 4px; }
+  .mk-kind button { height: 40px; padding: 0 18px; border: 2px solid var(--line); border-radius: 999px; background: var(--sheet); font-weight: 700; font-size: .95rem; color: var(--muted); }
+  .mk-kind button[aria-checked="true"] { border-color: var(--ink); background: var(--ink); color: #fff; }
   .mk-form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; }
   .mk-form:has(.mk-hanare[hidden]) { grid-template-columns: 1fr auto; }
   .mk-l { display: flex; flex-direction: column; gap: 4px; font-weight: 700; font-size: .9rem; }
@@ -435,6 +439,11 @@
 </dialog>
 <dialog id="maker" aria-labelledby="mkTitle">
   <div class="ed-head"><strong id="mkTitle">配置図を作る</strong></div>
+  <div class="mk-kind" role="radiogroup" aria-label="駐車場の場所">
+    <span>駐車場は</span>
+    <button type="button" data-kind="0" role="radio">自宅の敷地内</button>
+    <button type="button" data-kind="1" role="radio">自宅から離れている</button>
+  </div>
   <div class="mk-form">
     <label class="mk-l"><span id="mkHomeLbl">自宅（使用の本拠）の住所</span>
       <input id="mkHome" type="text" placeholder="例：静岡県掛川市菊浜59-1" autocomplete="off"></label>
@@ -465,8 +474,8 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="peek" id="peek" aria-hidden="true"></div>
 
-<script src="data.js?v=20261110p"></script>
-<script src="attach.js?v=20261110p"></script>
+<script src="data.js?v=20261110q"></script>
+<script src="attach.js?v=20261110q"></script>
 <script>
 (() => {
   const $ = (s) => document.querySelector(s);
@@ -1149,10 +1158,7 @@
 
   async function openMaker(x) {
     mkItem = x;
-    const hanare = isHanare();
-    $("#mkTitle").textContent = `配置図を作る（${chosen(x).name}）`;
-    mk.querySelectorAll(".mk-hanare").forEach((el) => (el.hidden = !hanare));
-    $("#mkHomeLbl").textContent = hanare ? "自宅（使用の本拠）の住所" : "自宅（使用の本拠・保管場所）の住所";
+    mkApplyKind();
     const v = x.made && x.made.kind === chosen(x).name ? x.made.inputs : null;
     $("#mkHome").value = v ? v.mkHome : ""; $("#mkPark").value = v ? v.mkPark : "";
     $("#mkMsg").textContent = ""; $("#mkDist").textContent = "";
@@ -1174,6 +1180,35 @@
       setTimeout(() => { mapL.setView(v.center, v.zoom); syncR(false); mapR.setView(v.centerR, v.zoomR); mkUpdate(); }, 80);
     }
   }
+
+  // 敷地内／離れ の切り替え（作成画面の上のボタン）
+  function mkApplyKind() {
+    const hanare = isHanare();
+    $("#mkTitle").textContent = "配置図を作る";
+    mk.querySelectorAll(".mk-kind button").forEach((b) => b.setAttribute("aria-checked", String(Number(b.dataset.kind) === (hanare ? 1 : 0))));
+    mk.querySelectorAll(".mk-hanare").forEach((el) => (el.hidden = !hanare));
+    $("#mkHomeLbl").textContent = hanare ? "自宅（使用の本拠）の住所" : "自宅（使用の本拠・保管場所）の住所";
+  }
+  mk.querySelector(".mk-kind").addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-kind]"); if (!b || !mkItem) return;
+    const idx = mkItem.choices.findIndex((c) => (/離/.test(c.name) ? "1" : "0") === b.dataset.kind);
+    if (idx < 0 || idx === mkItem.pick) return;
+    mkItem.pick = idx;
+    mkApplyKind();
+    if (!mapL) return;
+    if (!isHanare() && pins.park) { pins.park.remove(); delete pins.park; }
+    Object.entries(pins).forEach(([k, m]) => m.setIcon(pinIcon(k)));
+    Object.values(pinsR).forEach((m) => m.remove()); Object.keys(pinsR).forEach((k) => delete pinsR[k]);
+    syncR(true); mkUpdate();
+    if (pins.home) fitPins();
+    $("#mkMsg").textContent = isHanare() && !pins.park ? "駐車場の住所を入れて「地図で探す」を押すか、地図の駐車場の場所をダブルクリックしてください。" : "";
+  });
+  // 閉じたとき：選び直した 敷地内／離れ をカードに反映（作成済みの図と食い違えば外す）
+  mk.addEventListener("close", () => {
+    if (!mkItem) return;
+    if (mkItem.made && mkItem.made.kind !== chosen(mkItem).name) mkItem.made = null;
+    redraw(mkItem);
+  });
 
   async function mkSearch() {
     $("#mkMsg").textContent = "検索しています…";
