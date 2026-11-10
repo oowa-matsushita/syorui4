@@ -501,8 +501,8 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="peek" id="peek" aria-hidden="true"></div>
 
-<script src="data.js?v=20261110m"></script>
-<script src="attach.js?v=20261110m"></script>
+<script src="data.js?v=20261110n"></script>
+<script src="attach.js?v=20261110n"></script>
 <script>
 (() => {
   const $ = (s) => document.querySelector(s);
@@ -1222,6 +1222,18 @@
     }
   }
   const targetKind = () => (isHanare() ? "park" : "home");
+  function dblMove(m, ll) {
+    const need = isHanare() ? ["home", "park"] : ["home"];
+    let k = need.find((n) => !pins[n]);   // まだ置いていない印があれば、それを置く
+    if (!k) {
+      const pt = m.latLngToContainerPoint(ll);
+      const near = (n) => m.latLngToContainerPoint((m === mapR ? pinsR[n] || pins[n] : pins[n]).getLatLng()).distanceTo(pt);
+      k = need.filter((n) => m !== mapR || pinsR[n]).sort((a, b) => near(a) - near(b))[0] || targetKind();
+    }
+    setPin(k, ll);
+    syncR(m === mapL && k === targetKind());
+    mkUpdate();
+  }
   // 配置図の欄：保管場所（離れ＝駐車場、敷地内＝自宅）を中心に、いちばん拡大して表示
   function syncR(recenter) {
     Object.keys(pinsR).forEach((k) => { if (!pins[k] || (k === "park" && !isHanare())) { pinsR[k].remove(); delete pinsR[k]; } });
@@ -1272,6 +1284,8 @@
       tileLayer().addTo(mapL);
       mapR = L.map("mkMapR", { zoomSnap: 1, minZoom: 16, maxZoom: ZOOM_R }).setView([34.77, 138.01], ZOOM_R);
       tileLayer().addTo(mapR);
+      // ダブルクリック（スマホはダブルタップ）した場所へ、いちばん近い印を動かす
+      [mapL, mapR].forEach((m) => { m.doubleClickZoom.disable(); m.on("dblclick", (e) => dblMove(m, e.latlng)); });
     }
     [pins, pinsR].forEach((o) => { Object.values(o).forEach((m) => m.remove()); Object.keys(o).forEach((k) => delete o[k]); });
     if (mkLine) { mkLine.remove(); mkLine = null; }
@@ -1294,7 +1308,7 @@
       }
       if (!isHanare() && pins.park) { pins.park.remove(); delete pins.park; }
       fitPins(); syncR(true); mkUpdate();
-      $("#mkMsg").innerHTML = '<span class="mk-tip"><b>印の先が正しい場所を指しているか確認してください。</b><strong>ずれていたら、印をつかんで正しい場所へ動かせます。</strong><small>地図は、見えている範囲がそのまま印刷されます。</small></span>';
+      $("#mkMsg").innerHTML = '<span class="mk-tip"><b>印の先が正しい場所を指しているか確認してください。</b><strong>ずれていたら、正しい場所をダブルクリックすると印が動きます。</strong><small>印をつかんで動かすこともできます。2つ印があるときは、近いほうが動きます。地図は、見えている範囲がそのまま印刷されます。</small></span>';
     } catch (e) { $("#mkMsg").textContent = e.message; }
   }
 
