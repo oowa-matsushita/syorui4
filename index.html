@@ -285,6 +285,15 @@
   }
   @media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
 
+  /* ---- 利用回数（右上の隠しボタン） ---- */
+  .cnt-open { position: absolute; right: 0; top: 0; width: 56px; height: 56px; border: 0; background: transparent; opacity: 0; cursor: default; }
+  #counter { width: min(92vw, 440px); padding: 20px 22px; }
+  .cnt-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 6px 0 10px; }
+  .cnt-grid div { border: 1px solid var(--line); border-radius: 6px; padding: 10px; text-align: center; }
+  .cnt-grid small { display: block; color: var(--muted); font-size: .8rem; }
+  .cnt-grid b { font-size: 1.8rem; }
+  .cnt-grid span { font-size: .85rem; margin-left: 2px; }
+  .cnt-msg { color: var(--muted); font-size: .85rem; margin: 6px 0 12px; }
   /* ---- 配置図を作る ---- */
   #maker { width: min(96vw, 1100px); max-height: 94vh; overflow: auto; padding: 18px 20px 0; }
   #maker .mk-hanare[hidden] { display: none; }
@@ -370,6 +379,7 @@
     </svg>
     <span class="word"><span class="w1">書類印刷</span><span class="w2">システム</span></span>
   </h1>
+  <button class="cnt-open" id="cntOpen" aria-label="利用回数" tabindex="-1"></button>
 </header>
 <main>
   <section class="att" id="att" hidden>
@@ -437,6 +447,11 @@
     <button id="edClose" class="ask-yes">保存して閉じる</button>
   </div>
 </dialog>
+<dialog id="counter" aria-label="利用回数">
+  <div class="ed-head"><strong>利用回数</strong></div>
+  <div id="cntBody"></div>
+  <div class="ed-btns"><button id="cntClose" class="ask-no">閉じる</button></div>
+</dialog>
 <dialog id="maker" aria-labelledby="mkTitle">
   <div class="ed-head"><strong id="mkTitle">配置図を作る</strong></div>
   <div class="mk-kind" role="radiogroup" aria-label="駐車場の場所">
@@ -474,8 +489,8 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="peek" id="peek" aria-hidden="true"></div>
 
-<script src="data.js?v=20261110q"></script>
-<script src="attach.js?v=20261110q"></script>
+<script src="data.js?v=20261110r"></script>
+<script src="attach.js?v=20261110r"></script>
 <script>
 (() => {
   const $ = (s) => document.querySelector(s);
@@ -886,8 +901,36 @@
       toast("印刷する書類がありません。役所などで取得する書類は、頭紙をつけると返送リストに載ります。", true);
       return;
     }
+    countPrint(list);
     printItems(docs, cover);
   }
+
+  // ---------- 利用回数のカウント（Googleスプレッドシートに1行ずつ記録） ----------
+  const CNT_URL = (typeof COUNTER_URL === "string" && COUNTER_URL) || "";
+  function countPrint(list) {
+    if (!CNT_URL) return;
+    const names = list.map((x) => listNameOf(x)).join("、").slice(0, 400);
+    const n = list.reduce((a, x) => a + (x.copies || 1), 0);
+    const u = `${CNT_URL}?action=log&docs=${encodeURIComponent(names)}&n=${n}`;
+    try { fetch(u, { mode: "no-cors", keepalive: true }).catch(() => {}); } catch (_) {}
+  }
+  const cnt = $("#counter");
+  $("#cntOpen").addEventListener("click", async () => {
+    cnt.showModal();
+    const body = $("#cntBody");
+    if (!CNT_URL) { body.innerHTML = '<p class="cnt-msg">カウンターの設定がまだです（data.js の COUNTER_URL）。</p>'; return; }
+    body.innerHTML = '<p class="cnt-msg">読み込んでいます…</p>';
+    try {
+      const r = await fetch(`${CNT_URL}?action=count&t=${Date.now()}`);
+      const d = await r.json();
+      body.innerHTML = `<div class="cnt-grid">
+        <div><small>今日</small><b>${d.today}</b><span>回</span></div>
+        <div><small>今月</small><b>${d.month}</b><span>回</span></div>
+        <div><small>合計</small><b>${d.total}</b><span>回</span></div></div>
+        <p class="cnt-msg">印刷ボタンが押された回数です。${d.since ? `（${esc(d.since)}から）` : ""}</p>`;
+    } catch (_) { body.innerHTML = '<p class="cnt-msg">回数を読み込めませんでした。少し待ってからもう一度開いてください。</p>'; }
+  });
+  $("#cntClose").addEventListener("click", () => cnt.close());
 
   // ---------- 印刷デザイン（添付書類・頭紙で共通） ----------
   // A4縦をpt単位で描き、2.5倍の画像にしてPDFに貼る（日本語フォントをPDFに埋め込まずに済むため）
