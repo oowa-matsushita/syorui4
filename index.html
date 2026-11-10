@@ -285,42 +285,35 @@
   }
   @media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
   /* ---- 配置図を作る ---- */
-  #maker { width: min(96vw, 1040px); max-height: 94vh; overflow: auto; padding: 18px 20px 0; }
+  #maker { width: min(96vw, 1100px); max-height: 94vh; overflow: auto; padding: 18px 20px 0; }
   #maker .mk-hanare[hidden] { display: none; }
-  .mk-btns { position: sticky; bottom: 0; background: var(--sheet); padding: 12px 0 16px; margin-top: 8px; }
-  .mk-body { display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
-  .mk-form { display: flex; flex-direction: column; gap: 10px; }
+  .mk-form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; }
+  .mk-form:has(.mk-hanare[hidden]) { grid-template-columns: 1fr auto; }
   .mk-l { display: flex; flex-direction: column; gap: 4px; font-weight: 700; font-size: .9rem; }
-  .mk-l input, .mk-dims input {
+  .mk-l input {
     font: inherit; font-size: 1rem; color: var(--ink); background: var(--sheet);
     border: 1px solid var(--line); border-radius: 5px; padding: 8px 10px;
   }
-  .mk-find { height: 44px; background: var(--ink); color: #fff; font-size: 1rem; }
-  .mk-msg { margin: 0; font-size: .82rem; font-weight: 400; color: var(--muted); min-height: 1.2em; line-height: 1.5; }
-  .mk-dims { border: 1px solid var(--line); border-radius: 5px; padding: 8px 12px 12px; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; }
-  .mk-dims legend { font-weight: 700; font-size: .9rem; padding: 0 4px; }
-  .mk-dims label { display: flex; flex-direction: column; gap: 3px; font-size: .8rem; }
-  .mk-dims input { width: 100%; padding: 6px 8px; }
-  .mk-view { min-width: 0; }
+  .mk-find { height: 42px; padding: 0 22px; background: var(--ink); color: #fff; font-size: 1rem; }
+  .mk-msg { margin: 8px 0 10px; font-size: .85rem; font-weight: 400; color: var(--muted); min-height: 1.3em; line-height: 1.5; }
+  .mk-maps { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .mk-cap { font-weight: 700; font-size: .9rem; margin: 0 0 4px; }
   .mk-cap small { font-weight: 400; color: var(--muted); margin-left: 6px; }
-  #mkMap { width: 100%; aspect-ratio: 343.5 / 301.5; max-height: 66vh; border: 1px solid var(--ink); border-radius: 4px; background: var(--paper); }
-  .mk-dist { font-weight: 700; color: var(--shu); min-height: 1.4em; margin: 4px 0 8px; font-size: .9rem; }
+  #mkMap, #mkMapR { width: 100%; aspect-ratio: 343.5 / 301.5; border: 1px solid var(--ink); border-radius: 4px; background: var(--paper); }
+  .mk-dist { font-weight: 700; color: var(--shu); min-height: 1.4em; margin: 4px 0 0; font-size: .9rem; }
   .mk-dist.warn { background: #FBEDEB; padding: 2px 8px; border-radius: 4px; }
-  #mkPlan { width: 100%; border: 1px solid var(--line); border-radius: 4px; display: block; }
+  .mk-btns { position: sticky; bottom: 0; background: var(--sheet); padding: 12px 0 16px; margin-top: 8px; }
   .mk-btns button { flex: 1; }
   .mk-btns #mkClear { flex: 0 1 auto; padding: 0 14px; font-size: .85rem; color: var(--muted); }
-  .mk-pin { position: absolute; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 4px; white-space: nowrap; cursor: grab; }
-  .mk-pin b { width: 22px; height: 22px; border: 2px solid #000; background: #fff; display: grid; place-items: center; font-size: 13px; font-weight: 900;
-    background-image: repeating-linear-gradient(45deg, #000 0 1.5px, #fff 1.5px 5px); }
-  .mk-pin.park b { background-image: none; }
-  .mk-pin span { position: absolute; left: 26px; background: #fff; border: 1px solid #000; padding: 0 4px; font-size: 12px; font-weight: 700; }
+  .mk-pin { overflow: visible; }
+  .mk-pin svg { display: block; filter: drop-shadow(0 1px 2px rgba(0,0,0,.4)); }
+  .mk-pin span { position: absolute; left: calc(100% + 2px); top: 2px; background: #fff; border: 2px solid; border-radius: 3px; padding: 0 5px; font-size: 13px; font-weight: 900; white-space: nowrap; }
   .mkrow { grid-column: 1 / -1; height: 38px; border: 1px dashed var(--ink); border-radius: 5px; background: var(--sheet); font-weight: 700; font-size: .9rem; }
   .mkrow:hover { background: var(--paper); }
   .mkrow.done { border-style: solid; background: #EEF4EE; }
   @media (max-width: 760px) {
-    .mk-body { grid-template-columns: 1fr; }
-    #maker { padding: 14px; }
+    .mk-form, .mk-form:has(.mk-hanare[hidden]), .mk-maps { grid-template-columns: 1fr; }
+    #maker { padding: 14px 14px 0; }
   }
   /* ---- 押したときの動き ---- */
   .item, .one, .go, .clear, .mchip, .stepper button, .chip, .att-head, .ed-btns button, .ask-btns button {
@@ -436,31 +429,18 @@
 </dialog>
 <dialog id="maker" aria-labelledby="mkTitle">
   <div class="ed-head"><strong id="mkTitle">配置図を作る</strong></div>
-  <div class="mk-body">
-    <div class="mk-form">
-      <label class="mk-l"><span id="mkHomeLbl">自宅（使用の本拠）の住所</span>
-        <input id="mkHome" type="text" placeholder="例：静岡県掛川市菊浜59-1" autocomplete="off"></label>
-      <label class="mk-l mk-hanare"><span>駐車場（保管場所）の住所</span>
-        <input id="mkPark" type="text" placeholder="番地まで入れてください" autocomplete="off"></label>
-      <button id="mkFind" class="one mk-find">地図で探す</button>
-      <p id="mkMsg" class="mk-msg"></p>
-      <fieldset class="mk-dims">
-        <legend>配置図の寸法（m）</legend>
-        <label>道路幅<input id="mkRoad" inputmode="decimal" data-def="6"></label>
-        <label>入口の幅<input id="mkGate" inputmode="decimal" data-def="4"></label>
-        <label>駐車スペース 縦<input id="mkLen" inputmode="decimal" data-def="5"></label>
-        <label>駐車スペース 横<input id="mkWid" inputmode="decimal" data-def="2.5"></label>
-        <label class="mk-hanare">区画の数<input id="mkSlots" inputmode="numeric" data-def="5"></label>
-        <label class="mk-hanare">保管場所の番号<input id="mkNo" inputmode="numeric" data-def="1"></label>
-      </fieldset>
-      <div><div class="mk-cap">配置図 <small>寸法を変えるとすぐ反映</small></div>
-      <canvas id="mkPlan" width="687" height="603"></canvas></div>
-    </div>
-    <div class="mk-view">
-      <div class="mk-cap">所在図 <small>この範囲で印刷されます</small></div>
-      <div id="mkMap"></div>
-      <div id="mkDist" class="mk-dist"></div>
-    </div>
+  <div class="mk-form">
+    <label class="mk-l"><span id="mkHomeLbl">自宅（使用の本拠）の住所</span>
+      <input id="mkHome" type="text" placeholder="例：静岡県掛川市菊浜59-1" autocomplete="off"></label>
+    <label class="mk-l mk-hanare"><span>駐車場（保管場所）の住所</span>
+      <input id="mkPark" type="text" placeholder="番地まで入れてください" autocomplete="off"></label>
+    <button id="mkFind" class="one mk-find">地図で探す</button>
+  </div>
+  <p id="mkMsg" class="mk-msg"></p>
+  <div class="mk-maps">
+    <div><div class="mk-cap">所在図 <small>左の欄に印刷</small></div><div id="mkMap"></div>
+      <div id="mkDist" class="mk-dist"></div></div>
+    <div><div class="mk-cap">配置図 <small>右の欄に印刷（いちばん拡大した地図）</small></div><div id="mkMapR"></div></div>
   </div>
   <div class="ed-btns mk-btns">
     <button id="mkClear" class="ask-no">作成をやめて白紙に戻す</button>
@@ -479,8 +459,8 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="peek" id="peek" aria-hidden="true"></div>
 
-<script src="data.js?v=20261110h"></script>
-<script src="attach.js?v=20261110h"></script>
+<script src="data.js?v=20261110i"></script>
+<script src="attach.js?v=20261110i"></script>
 <script>
 (() => {
   const $ = (s) => document.querySelector(s);
@@ -1053,9 +1033,11 @@
   // 用紙（A4横・pt）の中の「所在図記載欄」「配置図記載欄」の位置
   const HZ = { W: 841.89, H: 595.28, L: { x: 59, y: 136.5, w: 343.5, h: 301.5 }, R: { x: 406.5, y: 136.5, w: 343.5, h: 301.5 } };
   const GSI_TILE = "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png";
+  const GSI_MAX = 18;                 // 地理院地図（標準）の一番細かい地図
+  const ZOOM_R = 20;                  // 配置図の欄は、いちばん拡大した状態で表示
   const GSI_GEO = "https://msearch.gsi.go.jp/address-search/AddressSearch?q=";
   const mk = $("#maker");
-  let mkItem = null, mkMap = null, mkPins = {}, mkLine = null, leafletReady = null;
+  let mkItem = null, mapL = null, mapR = null, pins = {}, pinsR = {}, mkLine = null, leafletReady = null;
 
   function loadLeaflet() {
     if (window.L && window.L.map) return Promise.resolve();
@@ -1073,7 +1055,6 @@
   }
   const isHanare = () => mkItem && /離/.test(chosen(mkItem).name);
   const mkVal = (id) => $("#" + id).value.trim();
-  const mkNum = (id, def) => { const v = parseFloat(mkVal(id).replace(/[^\d.]/g, "")); return isFinite(v) && v > 0 ? v : def; };
   function distM(a, b) {
     const R = 6371000, r = Math.PI / 180;
     const dLat = (b.lat - a.lat) * r, dLng = (b.lng - a.lng) * r;
@@ -1086,42 +1067,66 @@
     const res = await fetch(GSI_GEO + encodeURIComponent(q));
     if (!res.ok) throw new Error("住所の検索に失敗しました。");
     const js = await res.json();
-    if (!js.length) throw new Error(`「${q}」が見つかりませんでした。番地まで入れるか、地図のピンを動かしてください。`);
+    if (!js.length) throw new Error(`「${q}」が見つかりませんでした。番地まで入れるか、地図の印を動かしてください。`);
     const [lng, lat] = js[0].geometry.coordinates;
     return { lat, lng };
   }
 
-  function pinIcon(kind) {
-    const html = kind === "home"
-      ? '<div class="mk-pin home"><b></b><span>自宅</span></div>'
-      : '<div class="mk-pin park"><b>P</b><span>駐車場</span></div>';
-    return L.divIcon({ className: "", html, iconSize: [0, 0] });
+  // 画面の地図の印（先がとがったピン。先っぽが正確な位置）
+  const PIN = {
+    home: { color: "#D7262B", mark: "", label: "自宅" },
+    park: { color: "#1F3F9A", mark: "P", label: "駐車場" },
+  };
+  function pinIcon(kind, big) {
+    const p = PIN[kind], s = big ? 1.25 : 1;
+    const label = kind === "home" ? (isHanare() ? "自宅" : "自宅（保管場所）") : "駐車場（保管場所）";
+    const svg = `<svg width="${32 * s}" height="${44 * s}" viewBox="0 0 32 44"><path d="M16 43 C16 43 3 26 3 16 A13 13 0 1 1 29 16 C29 26 16 43 16 43Z" fill="${p.color}" stroke="#fff" stroke-width="2"/>`
+      + (p.mark ? `<text x="16" y="21" text-anchor="middle" font-size="15" font-weight="900" fill="#fff" font-family="sans-serif">P</text>`
+                : `<path d="M8 17 L16 9 L24 17 M11 15 V23 H21 V15" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/>`) + `</svg>`;
+    return L.divIcon({ className: "mk-pin", html: `${svg}<span style="border-color:${p.color};color:${p.color}">${label}</span>`,
+      iconSize: [32 * s, 44 * s], iconAnchor: [16 * s, 43 * s] });
   }
   function setPin(kind, ll) {
-    if (mkPins[kind]) mkPins[kind].setLatLng(ll);
+    if (pins[kind]) pins[kind].setLatLng(ll);
     else {
-      mkPins[kind] = L.marker(ll, { icon: pinIcon(kind), draggable: true }).addTo(mkMap);
-      mkPins[kind].on("drag dragend", mkUpdate);
+      pins[kind] = L.marker(ll, { icon: pinIcon(kind), draggable: true, zIndexOffset: kind === "home" ? 1000 : 0 }).addTo(mapL);
+      pins[kind].on("drag dragend", () => { syncR(true); mkUpdate(); });
     }
   }
+  const targetKind = () => (isHanare() ? "park" : "home");
+  // 配置図の欄：保管場所（離れ＝駐車場、敷地内＝自宅）を中心に、いちばん拡大して表示
+  function syncR(recenter) {
+    Object.keys(pinsR).forEach((k) => { if (!pins[k] || (k === "park" && !isHanare())) { pinsR[k].remove(); delete pinsR[k]; } });
+    Object.entries(pins).forEach(([k, m]) => {
+      if (k === "park" && !isHanare()) return;
+      if (pinsR[k]) pinsR[k].setLatLng(m.getLatLng());
+      else {
+        pinsR[k] = L.marker(m.getLatLng(), { icon: pinIcon(k, true), draggable: true, zIndexOffset: k === targetKind() ? 1000 : 0 }).addTo(mapR);
+        pinsR[k].on("drag dragend", () => { pins[k].setLatLng(pinsR[k].getLatLng()); mkUpdate(); });
+      }
+    });
+    const t = pins[targetKind()];
+    if (recenter && t) mapR.setView(t.getLatLng(), ZOOM_R, { animate: false });
+  }
   function mkUpdate() {
-    const h = mkPins.home && mkPins.home.getLatLng(), p = isHanare() && mkPins.park && mkPins.park.getLatLng();
+    const h = pins.home && pins.home.getLatLng(), p = isHanare() && pins.park && pins.park.getLatLng();
     if (mkLine) { mkLine.remove(); mkLine = null; }
     let msg = "";
     if (h && p) {
-      mkLine = L.polyline([h, p], { color: "#D7262B", weight: 3, dashArray: "8 6" }).addTo(mkMap);
+      mkLine = L.polyline([h, p], { color: "#D7262B", weight: 3, dashArray: "8 6" }).addTo(mapL);
       const d = distM(h, p);
       msg = `直線距離 ${distText(d)}` + (d > 2000 ? "　※2kmを超えています（車庫証明は2km以内が必要です）" : "");
     }
     $("#mkDist").textContent = msg;
     $("#mkDist").classList.toggle("warn", /超え/.test(msg));
-    drawPlanPreview();
   }
   function fitPins() {
-    const pts = Object.entries(mkPins).filter(([k]) => k === "home" || isHanare()).map(([, m]) => m.getLatLng());
-    if (pts.length === 1) mkMap.setView(pts[0], 17);
-    else if (pts.length > 1) mkMap.fitBounds(L.latLngBounds(pts).pad(0.35), { maxZoom: 17 });
+    const pts = Object.entries(pins).filter(([k]) => k === "home" || isHanare()).map(([, m]) => m.getLatLng());
+    if (pts.length === 1) mapL.setView(pts[0], 16);
+    else if (pts.length > 1) mapL.fitBounds(L.latLngBounds(pts).pad(0.35), { maxZoom: 17 });
   }
+  const tileLayer = () => L.tileLayer(GSI_TILE, { maxNativeZoom: GSI_MAX, maxZoom: ZOOM_R,
+    attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">地理院タイル</a>' });
 
   async function openMaker(x) {
     mkItem = x;
@@ -1130,23 +1135,23 @@
     mk.querySelectorAll(".mk-hanare").forEach((el) => (el.hidden = !hanare));
     $("#mkHomeLbl").textContent = hanare ? "自宅（使用の本拠）の住所" : "自宅（使用の本拠・保管場所）の住所";
     const v = x.made && x.made.kind === chosen(x).name ? x.made.inputs : null;
-    ["mkHome", "mkPark", "mkRoad", "mkGate", "mkLen", "mkWid", "mkSlots", "mkNo"].forEach((id) => {
-      $("#" + id).value = v ? v[id] : $("#" + id).dataset.def || "";
-    });
-    $("#mkMsg").textContent = "";
+    $("#mkHome").value = v ? v.mkHome : ""; $("#mkPark").value = v ? v.mkPark : "";
+    $("#mkMsg").textContent = ""; $("#mkDist").textContent = "";
     mk.showModal();
     try { await loadLeaflet(); } catch (e) { $("#mkMsg").textContent = e.message; return; }
-    if (!mkMap) {
-      mkMap = L.map("mkMap", { zoomSnap: 1, attributionControl: true }).setView([34.77, 138.01], 15);
-      L.tileLayer(GSI_TILE, { maxZoom: 18, attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">地理院タイル</a>' }).addTo(mkMap);
+    if (!mapL) {
+      mapL = L.map("mkMap", { zoomSnap: 1, maxZoom: GSI_MAX }).setView([34.77, 138.01], 15);
+      tileLayer().addTo(mapL);
+      mapR = L.map("mkMapR", { zoomSnap: 1, minZoom: 16, maxZoom: ZOOM_R }).setView([34.77, 138.01], ZOOM_R);
+      tileLayer().addTo(mapR);
     }
-    Object.values(mkPins).forEach((m) => m.remove()); mkPins = {};
+    [pins, pinsR].forEach((o) => { Object.values(o).forEach((m) => m.remove()); Object.keys(o).forEach((k) => delete o[k]); });
     if (mkLine) { mkLine.remove(); mkLine = null; }
-    setTimeout(() => mkMap.invalidateSize(), 50);
+    setTimeout(() => { mapL.invalidateSize(); mapR.invalidateSize(); }, 50);
     if (v) {
       setPin("home", v.home); if (v.park) setPin("park", v.park);
-      setTimeout(() => { mkMap.setView(v.center, v.zoom); mkUpdate(); }, 80);
-    } else drawPlanPreview();
+      setTimeout(() => { mapL.setView(v.center, v.zoom); syncR(false); mapR.setView(v.centerR, v.zoomR); mkUpdate(); }, 80);
+    }
   }
 
   async function mkSearch() {
@@ -1159,9 +1164,9 @@
         if (!q) throw new Error(k === "home" ? "自宅の住所を入れてください。" : "駐車場の住所を入れてください。");
         setPin(k, await geocode(q));
       }
-      if (!isHanare() && mkPins.park) { mkPins.park.remove(); delete mkPins.park; }
-      fitPins(); mkUpdate();
-      $("#mkMsg").textContent = "ピンは指でつかんで正しい場所に動かせます。地図の大きさも調整してください（この範囲で印刷されます）。";
+      if (!isHanare() && pins.park) { pins.park.remove(); delete pins.park; }
+      fitPins(); syncR(true); mkUpdate();
+      $("#mkMsg").textContent = "印の先が正しい場所を指しているか確認してください。ずれていたら印をつかんで動かせます。地図は見えている範囲がそのまま印刷されます。";
     } catch (e) { $("#mkMsg").textContent = e.message; }
   }
 
@@ -1171,176 +1176,114 @@
     im.onload = () => res(im); im.onerror = () => rej(new Error("地図の画像を読み込めませんでした。"));
     im.src = src;
   });
-  function hatch(g, x, y, w, h, step) {
-    g.save(); g.beginPath(); g.rect(x, y, w, h); g.clip();
-    g.lineWidth = 0.6; g.beginPath();
-    for (let i = -h; i < w; i += step) { g.moveTo(x + i, y + h); g.lineTo(x + i + h, y); }
-    g.stroke(); g.restore();
-  }
-  function dimLine(g, x1, y1, x2, y2, label, off) {
-    g.save(); g.lineWidth = 0.7; g.strokeStyle = g.fillStyle = "#000";
-    g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke();
-    const head = (ax, ay, bx, by) => {
-      const a = Math.atan2(by - ay, bx - ax), s = 4.5;
-      g.beginPath(); g.moveTo(bx, by);
-      g.lineTo(bx - s * Math.cos(a - 0.45), by - s * Math.sin(a - 0.45));
-      g.lineTo(bx - s * Math.cos(a + 0.45), by - s * Math.sin(a + 0.45)); g.closePath(); g.fill();
-    };
-    head(x1, y1, x2, y2); head(x2, y2, x1, y1);
-    g.font = `700 10px ${PF}`; g.textAlign = "center"; g.textBaseline = "middle";
-    const mx = (x1 + x2) / 2 + (off ? off[0] : 0), my = (y1 + y2) / 2 + (off ? off[1] : 0);
-    const tw = g.measureText(label).width + 6;
-    g.fillStyle = "#fff"; g.fillRect(mx - tw / 2, my - 7, tw, 14);
-    g.fillStyle = "#000"; g.fillText(label, mx, my);
+  // 紙に描くピン（先っぽが正確な位置）とラベル
+  function paperPin(g, x, y, kind, main, sub, B, s) {
+    const p = PIN[kind]; s = s || 1;
+    g.save();
+    // 位置を囲む輪
+    g.strokeStyle = p.color; g.lineWidth = 1.6 * s; g.fillStyle = p.color + "22";
+    g.beginPath(); g.arc(x, y, 7 * s, 0, Math.PI * 2); g.fill(); g.stroke();
+    // ピン
+    g.translate(x, y); g.scale(0.62 * s, 0.62 * s); g.translate(-16, -43);
+    g.beginPath(); g.moveTo(16, 43); g.bezierCurveTo(16, 43, 3, 26, 3, 16); g.arc(16, 16, 13, Math.PI, 0); g.bezierCurveTo(29, 26, 16, 43, 16, 43); g.closePath();
+    g.fillStyle = p.color; g.fill(); g.strokeStyle = "#fff"; g.lineWidth = 2; g.stroke();
+    if (p.mark) { g.fillStyle = "#fff"; g.font = `900 15px ${PF}`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("P", 16, 17); }
+    else { g.strokeStyle = "#fff"; g.lineWidth = 2.6; g.lineJoin = "round"; g.beginPath(); g.moveTo(8, 17); g.lineTo(16, 9); g.lineTo(24, 17); g.moveTo(11, 15); g.lineTo(11, 23); g.lineTo(21, 23); g.lineTo(21, 15); g.stroke(); }
+    g.restore();
+    // ラベル（右に置けなければ左に）
+    g.save();
+    const f1 = `700 ${12 * s}px ${PF}`, f2 = `700 ${8.5 * s}px ${PF}`;
+    g.font = f1; let w = g.measureText(main).width; g.font = f2; w = Math.max(w, g.measureText(sub).width) + 10 * s;
+    const hgt = 29 * s, right = x + 14 * s + w < B.x + B.w - 4;
+    const lx = right ? x + 13 * s : x - 13 * s - w, ly = Math.min(Math.max(y - 30 * s, B.y + 3), B.y + B.h - hgt - 3);
+    g.fillStyle = "#fff"; g.strokeStyle = p.color; g.lineWidth = 1.4 * s;
+    g.fillRect(lx, ly, w, hgt); g.strokeRect(lx, ly, w, hgt);
+    g.fillStyle = p.color; g.textAlign = "left"; g.textBaseline = "alphabetic";
+    g.font = f1; g.fillText(main, lx + 5 * s, ly + 13 * s);
+    g.font = f2; g.fillStyle = "#000"; g.fillText(sub, lx + 5 * s, ly + 24 * s);
     g.restore();
   }
-  const fmt = (n) => (Math.round(n * 10) / 10) + "m";
-
-  // 配置図（右の欄）：道路・入口・駐車スペースの寸法
-  function drawPlan(g, B) {
-    const hanare = isHanare();
-    const road = mkNum("mkRoad", 6), gate = mkNum("mkGate", 4), len = mkNum("mkLen", 5), wid = mkNum("mkWid", 2.5);
-    g.save(); g.translate(B.x, B.y);
-    g.strokeStyle = g.fillStyle = "#000"; g.textBaseline = "alphabetic";
-    const W = B.w, H = B.h;
-    // 方位
-    g.font = `700 10px ${PF}`; g.textAlign = "center";
-    // 道路（上）
-    const rTop = 30, rBot = 72;
-    g.lineWidth = 1.6;
-    g.beginPath(); g.moveTo(14, rTop); g.lineTo(W - 14, rTop); g.stroke();
-    const lotL = 34, lotR = W - 34, lotB = H - 18;
-    const gw = Math.min(lotR - lotL - 40, Math.max(46, (lotR - lotL) * Math.min(0.6, gate / 12)));
-    const gx = hanare ? (lotL + lotR) / 2 - gw / 2 : lotR - 30 - gw;
-    g.beginPath(); g.moveTo(14, rBot); g.lineTo(gx, rBot); g.moveTo(gx + gw, rBot); g.lineTo(W - 14, rBot); g.stroke();
-    g.font = `700 11px ${PF}`; g.textAlign = "left";
-    g.fillText("道路", 20, rTop + 26);
-    dimLine(g, 78, rTop + 2, 78, rBot - 2, `道路幅 ${fmt(road)}`, [40, 0]);
-    // 敷地
-    g.lineWidth = 1.2;
-    g.beginPath(); g.moveTo(gx, rBot); g.lineTo(lotL, rBot); g.lineTo(lotL, lotB); g.lineTo(lotR, lotB); g.lineTo(lotR, rBot); g.lineTo(gx + gw, rBot); g.stroke();
-    dimLine(g, gx + 2, rBot + 14, gx + gw - 2, rBot + 14, `入口 ${fmt(gate)}`);
-    if (!hanare) {
-      // 自宅と駐車スペース
-      g.lineWidth = 1.2; g.strokeRect(lotL + 14, rBot + 34, 104, lotB - rBot - 50);
-      g.font = `700 13px ${PF}`; g.textAlign = "center";
-      g.fillText("自宅", lotL + 66, (rBot + lotB) / 2 + 6);
-      const sw = 62, sh = Math.min(lotB - rBot - 70, Math.max(80, sw * len / wid));
-      const sx = gx + gw / 2 - sw / 2, sy = lotB - 14 - sh;
-      g.lineWidth = 1.6; g.strokeRect(sx, sy, sw, sh); hatch(g, sx, sy, sw, sh, 7);
-      g.fillStyle = "#fff"; g.fillRect(sx + 6, sy + sh / 2 - 9, sw - 12, 18); g.fillStyle = "#000";
-      g.font = `700 10px ${PF}`; g.fillText("保管場所", sx + sw / 2, sy + sh / 2 + 4);
-      dimLine(g, sx + 1, sy - 9, sx + sw - 1, sy - 9, `横 ${fmt(wid)}`);
-      dimLine(g, sx - 9, sy + 1, sx - 9, sy + sh - 1, `縦 ${fmt(len)}`, [-22, 0]);
-    } else {
-      const n = Math.min(10, Math.max(1, Math.round(mkNum("mkSlots", 5)))), no = Math.min(n, Math.max(1, Math.round(mkNum("mkNo", 1))));
-      const areaL = lotL + 12, areaR = lotR - 12, sw = Math.min(56, (areaR - areaL) / n), sh = Math.min(lotB - rBot - 92, Math.max(60, sw * len / wid));
-      const sx0 = (areaL + areaR) / 2 - sw * n / 2, sy = lotB - 12 - sh;
-      for (let i = 0; i < n; i++) {
-        const sx = sx0 + i * sw;
-        g.lineWidth = i + 1 === no ? 1.8 : 0.9; g.strokeRect(sx, sy, sw, sh);
-        if (i + 1 === no) hatch(g, sx, sy, sw, sh, 6);
-        g.font = `700 ${i + 1 === no ? 11 : 10}px ${PF}`; g.textAlign = "center";
-        const t = i + 1 === no ? `No.${i + 1}` : String(i + 1);
-        if (i + 1 === no) { g.fillStyle = "#fff"; g.fillRect(sx + 3, sy + sh / 2 - 8, sw - 6, 16); g.fillStyle = "#000"; }
-        g.fillText(t, sx + sw / 2, sy + sh / 2 + 4);
-      }
-      const hx = sx0 + (no - 1) * sw;
-      dimLine(g, hx + 1, sy - 9, hx + sw - 1, sy - 9, fmt(wid));
-      dimLine(g, sx0 + sw * n + 9, sy + 1, sx0 + sw * n + 9, sy + sh - 1, fmt(len), [14, 0]);
-      g.font = `700 11px ${PF}`; g.textAlign = "center";
-      g.fillText(`保管場所は No.${no}`, hx + sw / 2, sy - 22);
-    }
-    g.restore();
-  }
-  function drawPlanPreview() {
-    const c = $("#mkPlan"); if (!c || !mkItem) return;
-    const S = c.width / HZ.R.w, g = c.getContext("2d");
-    g.setTransform(1, 0, 0, 1, 0, 0); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height);
-    g.setTransform(S, 0, 0, S, -HZ.R.x * S, -HZ.R.y * S);
-    drawPlan(g, HZ.R);
-  }
-
-  // 所在図（左の欄）：いま地図に表示している範囲をそのまま描く
-  async function drawLocation(g, B) {
-    const z = mkMap.getZoom(), pb = mkMap.getPixelBounds();
+  // 画面の地図に見えている範囲を、欄いっぱいに描く
+  async function drawTiles(g, B, map) {
+    const z = map.getZoom(), tz = Math.min(z, GSI_MAX), f = 2 ** (z - tz), pb = map.getPixelBounds();
     const vw = pb.max.x - pb.min.x, vh = pb.max.y - pb.min.y;
-    const k = Math.max(B.w / vw, B.h / vh);           // 欄いっぱいに広げる（はみ出た分は切る）
+    const k = Math.max(B.w / vw, B.h / vh);
     const ox = pb.min.x + (vw - B.w / k) / 2, oy = pb.min.y + (vh - B.h / k) / 2;
     g.save(); g.beginPath(); g.rect(B.x, B.y, B.w, B.h); g.clip();
     g.translate(B.x, B.y); g.scale(k, k); g.translate(-ox, -oy);
-    const n = 2 ** z, jobs = [];
+    const T = 256 * f, n = 2 ** tz, jobs = [];
     let fail = 0;
-    for (let tx = Math.floor(ox / 256); tx <= Math.floor((ox + B.w / k) / 256); tx++)
-      for (let ty = Math.floor(oy / 256); ty <= Math.floor((oy + B.h / k) / 256); ty++) {
+    for (let tx = Math.floor(ox / T); tx <= Math.floor((ox + B.w / k) / T); tx++)
+      for (let ty = Math.floor(oy / T); ty <= Math.floor((oy + B.h / k) / T); ty++) {
         if (ty < 0 || ty >= n) continue;
-        const url = GSI_TILE.replace("{z}", z).replace("{x}", ((tx % n) + n) % n).replace("{y}", ty);
-        jobs.push(loadImg(url).then((im) => g.drawImage(im, tx * 256, ty * 256, 256, 256)).catch(() => { fail++; }));
+        const url = GSI_TILE.replace("{z}", tz).replace("{x}", ((tx % n) + n) % n).replace("{y}", ty);
+        jobs.push(loadImg(url).then((im) => g.drawImage(im, tx * T, ty * T, T, T)).catch(() => { fail++; }));
       }
     await Promise.all(jobs);
-    if (fail && fail === jobs.length) { g.restore(); throw new Error("地図の画像を取得できませんでした。少し待ってからもう一度「この内容で作成」を押してください。"); }
-    const P = (ll) => mkMap.project(ll, z);
-    const h = P(mkPins.home.getLatLng()), p = isHanare() && mkPins.park ? P(mkPins.park.getLatLng()) : null;
     g.restore();
-    // 印は紙の上の大きさで描く
-    const toPaper = (pt) => ({ x: B.x + (pt.x - ox) * k, y: B.y + (pt.y - oy) * k });
-    const H = toPaper(h), Pp = p && toPaper(p);
-    g.save(); g.beginPath(); g.rect(B.x, B.y, B.w, B.h); g.clip();
-    if (Pp) {
-      g.strokeStyle = "#D7262B"; g.lineWidth = 2; g.setLineDash([6, 4]);
-      g.beginPath(); g.moveTo(H.x, H.y); g.lineTo(Pp.x, Pp.y); g.stroke(); g.setLineDash([]);
-      const d = distText(distM(mkPins.home.getLatLng(), mkPins.park.getLatLng()));
-      const mx = (H.x + Pp.x) / 2, my = (H.y + Pp.y) / 2;
-      g.font = `700 11px ${PF}`; const t = `直線距離 ${d}`, tw = g.measureText(t).width + 12;
-      g.fillStyle = "#fff"; g.strokeStyle = "#D7262B"; g.lineWidth = 1.2;
-      g.fillRect(mx - tw / 2, my - 10, tw, 20); g.strokeRect(mx - tw / 2, my - 10, tw, 20);
-      g.fillStyle = "#D7262B"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(t, mx, my + 1);
-    }
-    const label = (pt, main, sub, isP) => {
-      g.fillStyle = "#fff"; g.strokeStyle = "#000"; g.lineWidth = 1.4;
-      g.beginPath(); g.rect(pt.x - 8, pt.y - 8, 16, 16); g.fill(); g.stroke();
-      if (isP) { g.fillStyle = "#000"; g.font = `900 11px ${PF}`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("P", pt.x, pt.y + 1); }
-      else hatch(g, pt.x - 8, pt.y - 8, 16, 16, 3.5);
-      g.font = `700 10.5px ${PF}`; g.textBaseline = "alphabetic";
-      const right = pt.x < B.x + B.w - 110, ax = right ? pt.x + 12 : pt.x - 12;
-      g.textAlign = right ? "left" : "right";
-      const w = Math.max(g.measureText(main).width, (g.font = `400 8.5px ${PF}`, g.measureText(sub).width)) + 8;
-      g.fillStyle = "rgba(255,255,255,.92)"; g.fillRect(right ? ax - 3 : ax - w + 3, pt.y - 12, w, 26);
-      g.fillStyle = "#000"; g.font = `700 10.5px ${PF}`; g.fillText(main, ax, pt.y);
-      g.font = `400 8.5px ${PF}`; g.fillText(sub, ax, pt.y + 11);
-    };
-    if (Pp) label(Pp, "駐車場", "（保管場所）", true);
-    label(H, "自宅", isHanare() ? "（使用の本拠）" : "（使用の本拠・保管場所）", false);
-    // 方位と出典
+    if (fail && fail === jobs.length) throw new Error("地図の画像を取得できませんでした。少し待ってからもう一度「この内容で作成」を押してください。");
+    return (ll) => { const pt = map.project(ll, z); return { x: B.x + (pt.x - ox) * k, y: B.y + (pt.y - oy) * k }; };
+  }
+  function northAndSource(g, B) {
+    g.save();
     g.fillStyle = "#fff"; g.fillRect(B.x + B.w - 30, B.y + 6, 24, 34);
     g.fillStyle = "#000"; g.font = `700 10px ${PF}`; g.textAlign = "center"; g.fillText("北", B.x + B.w - 18, B.y + 17);
     g.beginPath(); g.moveTo(B.x + B.w - 18, B.y + 20); g.lineTo(B.x + B.w - 23, B.y + 36); g.lineTo(B.x + B.w - 18, B.y + 32); g.lineTo(B.x + B.w - 13, B.y + 36); g.closePath(); g.fill();
     g.font = `400 6.5px ${PF}`; g.textAlign = "right";
-    const src = "出典：国土地理院 地理院地図";
-    g.fillStyle = "rgba(255,255,255,.85)"; g.fillRect(B.x + B.w - g.measureText(src).width - 6, B.y + B.h - 10, g.measureText(src).width + 6, 10);
+    const src = "出典：国土地理院 地理院地図", w = g.measureText(src).width;
+    g.fillStyle = "rgba(255,255,255,.85)"; g.fillRect(B.x + B.w - w - 6, B.y + B.h - 10, w + 6, 10);
     g.fillStyle = "#000"; g.fillText(src, B.x + B.w - 3, B.y + B.h - 3);
     g.restore();
   }
+  async function drawLocation(g, B) {
+    const P = await drawTiles(g, B, mapL);
+    const hl = pins.home.getLatLng(), H = P(hl), pl = isHanare() && pins.park ? pins.park.getLatLng() : null, Pp = pl && P(pl);
+    g.save(); g.beginPath(); g.rect(B.x, B.y, B.w, B.h); g.clip();
+    if (Pp) {
+      g.strokeStyle = "#D7262B"; g.lineWidth = 2; g.setLineDash([6, 4]);
+      g.beginPath(); g.moveTo(H.x, H.y); g.lineTo(Pp.x, Pp.y); g.stroke(); g.setLineDash([]);
+      const t = `直線距離 ${distText(distM(hl, pl))}`, mx = (H.x + Pp.x) / 2, my = (H.y + Pp.y) / 2;
+      g.font = `700 11px ${PF}`; const tw = g.measureText(t).width + 12;
+      g.fillStyle = "#fff"; g.strokeStyle = "#D7262B"; g.lineWidth = 1.2;
+      g.fillRect(mx - tw / 2, my - 10, tw, 20); g.strokeRect(mx - tw / 2, my - 10, tw, 20);
+      g.fillStyle = "#D7262B"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(t, mx, my + 1);
+      paperPin(g, Pp.x, Pp.y, "park", "駐車場", "（保管場所）", B);
+    }
+    paperPin(g, H.x, H.y, "home", "自宅", isHanare() ? "（使用の本拠）" : "（使用の本拠・保管場所）", B);
+    g.restore();
+    northAndSource(g, B);
+  }
+  async function drawPlace(g, B) {
+    const P = await drawTiles(g, B, mapR);
+    g.save(); g.beginPath(); g.rect(B.x, B.y, B.w, B.h); g.clip();
+    if (isHanare()) {
+      const Pp = P(pins.park.getLatLng());
+      paperPin(g, Pp.x, Pp.y, "park", "保管場所", "（駐車場）", B, 1.3);
+    } else {
+      const H = P(pins.home.getLatLng());
+      paperPin(g, H.x, H.y, "home", "自宅・保管場所", "（使用の本拠）", B, 1.3);
+    }
+    g.restore();
+    northAndSource(g, B);
+  }
 
   async function mkBuild() {
-    if (!mkPins.home || (isHanare() && !mkPins.park)) throw new Error("先に「地図で探す」を押して、場所を決めてください。");
+    if (!pins.home || (isHanare() && !pins.park)) throw new Error("先に「地図で探す」を押して、場所を決めてください。");
     const S = 2.5, c = document.createElement("canvas");
     c.width = Math.round(HZ.W * S); c.height = Math.round(HZ.H * S);
     const g = c.getContext("2d"); g.scale(S, S);
     await drawLocation(g, HZ.L);
-    drawPlan(g, HZ.R);
+    await drawPlace(g, HZ.R);
     let png;
     try { png = await new Promise((res) => c.toBlob((b) => b.arrayBuffer().then(res), "image/png")); }
     catch (_) { throw new Error("地図を印刷用に変換できませんでした。時間をおいてもう一度お試しください。"); }
-    const inputs = {};
-    ["mkHome", "mkPark", "mkRoad", "mkGate", "mkLen", "mkWid", "mkSlots", "mkNo"].forEach((id) => (inputs[id] = $("#" + id).value));
-    inputs.home = mkPins.home.getLatLng(); inputs.park = mkPins.park ? mkPins.park.getLatLng() : null;
-    inputs.center = mkMap.getCenter(); inputs.zoom = mkMap.getZoom();
+    const inputs = { mkHome: $("#mkHome").value, mkPark: $("#mkPark").value,
+      home: pins.home.getLatLng(), park: pins.park ? pins.park.getLatLng() : null,
+      center: mapL.getCenter(), zoom: mapL.getZoom(), centerR: mapR.getCenter(), zoomR: mapR.getZoom() };
     return { png, kind: chosen(mkItem).name, inputs };
   }
 
   $("#mkFind").addEventListener("click", mkSearch);
-  mk.querySelectorAll(".mk-form input").forEach((el) => el.addEventListener("input", drawPlanPreview));
   ["mkHome", "mkPark"].forEach((id) => $("#" + id).addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); mkSearch(); } }));
   $("#mkCancel").addEventListener("click", () => mk.close());
   $("#mkClear").addEventListener("click", () => {
@@ -1353,7 +1296,7 @@
       const made = await mkBuild();
       mkItem.made = made; mkItem.on = true;
       mk.close(); redraw(mkItem, null, "make");
-      toast("配置図を作成しました。印刷すると地図と図が入ります。");
+      toast("配置図を作成しました。印刷すると地図が入ります。");
     } catch (e) { $("#mkMsg").textContent = e.message; }
     b.disabled = false;
   });
