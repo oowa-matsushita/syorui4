@@ -459,8 +459,8 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="peek" id="peek" aria-hidden="true"></div>
 
-<script src="data.js?v=20261110i"></script>
-<script src="attach.js?v=20261110i"></script>
+<script src="data.js?v=20261110j"></script>
+<script src="attach.js?v=20261110j"></script>
 <script>
 (() => {
   const $ = (s) => document.querySelector(s);
@@ -695,7 +695,7 @@
           </div>
           <button class="one" data-act="print" ${file ? "" : "disabled"}>印刷</button>
         </div>
-        ${x.maker ? `<button class="mkrow ${x.made ? "done" : ""}" data-act="make">${x.made ? "✓ 住所から作成済み（押すと直せます）" : "住所を入れて地図から作成する"}</button>` : ""}
+        ${x.maker ? `<button class="mkrow ${x.made ? "done" : ""}" data-act="make">${x.made ? "✓ 配置図を作成済み（ベータ版）　押すと直せます" : "配置図を作成（ベータ版）"}</button>` : ""}
         ${chosen(x).note ? `<div class="pick-note${/原本/.test(chosen(x).note) && !/原本またはコピー/.test(chosen(x).note) ? " gen" : ""}">${esc(chosen(x).note)}</div>` : ""}
       </div>`;
     }
