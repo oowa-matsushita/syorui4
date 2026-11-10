@@ -284,6 +284,33 @@
     .grid { grid-template-columns: 1fr; }
   }
   @media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
+
+  /* ---- かんたん選択（初心者マーク） ---- */
+  .wiz-open { position: absolute; right: 24px; top: 50%; transform: translateY(-50%); display: inline-flex; align-items: center; gap: 8px;
+    height: 46px; padding: 0 16px 0 10px; border: 2px solid var(--ink); border-radius: 999px; background: var(--sheet); font-weight: 700; font-size: .95rem; }
+  .wiz-open svg { width: 22px; height: 28px; }
+  .wiz-open:hover { background: var(--paper); }
+  .wiz-open:active { transform: translateY(-50%) scale(.95); }
+  @media (max-width: 640px) { .wiz-open { right: 14px; height: 40px; padding: 0 10px 0 8px; font-size: .85rem; } .wiz-open svg { width: 18px; height: 23px; } }
+  #wiz { width: min(94vw, 520px); padding: 22px 24px 20px; }
+  .wiz-top { display: flex; gap: 16px; align-items: center; font-size: .85rem; color: var(--muted); margin: 0 40px 6px 0; }
+  .wiz-bar { height: 6px; background: var(--paper); border-radius: 3px; overflow: hidden; margin-bottom: 18px; }
+  .wiz-bar i { display: block; height: 100%; background: var(--ink); transition: width .25s; }
+  #wiz h3 { margin: 0 0 6px; font-size: 1.3rem; line-height: 1.45; }
+  .wiz-hint { margin: 0 0 18px; color: var(--muted); font-size: .9rem; min-height: 1.2em; }
+  .wiz-ans { display: flex; gap: 10px; }
+  .wiz-ans button { flex: 1; height: 60px; border-radius: 6px; font-weight: 700; font-size: 1.15rem; border: 2px solid var(--ink); background: var(--sheet); }
+  .wiz-ans button:first-child { background: var(--ink); color: #fff; }
+  .wiz-ans button:active { transform: scale(.96); }
+  .wiz-back { border: none; background: none; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; padding: 0; font-size: .85rem; }
+  .wiz-sum { list-style: none; margin: 0 0 14px; padding: 0; max-height: 46vh; overflow: auto; border-top: 1px solid var(--line); }
+  .wiz-sum li { padding: 8px 2px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; gap: 10px; font-weight: 700; }
+  .wiz-sum li small { color: var(--muted); font-weight: 400; }
+  .wiz-ans.sum button { font-size: 1rem; height: auto; min-height: 52px; padding: 6px 8px; }
+  .wiz-note { font-size: .85rem; color: var(--shu); font-weight: 700; margin: 0 0 14px; }
+  .wiz-q { animation: wizIn .22s ease-out; }
+  @keyframes wizIn { from { opacity: 0; transform: translateX(12px); } }
+  @media (prefers-reduced-motion: reduce) { .wiz-q { animation: none; } }
   /* ---- 配置図を作る ---- */
   #maker { width: min(96vw, 1100px); max-height: 94vh; overflow: auto; padding: 18px 20px 0; }
   #maker .mk-hanare[hidden] { display: none; }
@@ -295,6 +322,11 @@
     border: 1px solid var(--line); border-radius: 5px; padding: 8px 10px;
   }
   .mk-find { height: 42px; padding: 0 22px; background: var(--ink); color: #fff; font-size: 1rem; }
+  .mk-tip { display: block; background: #FFF4CC; border: 2px solid #E0A800; border-left-width: 8px; border-radius: 6px; padding: 10px 14px; color: var(--ink); animation: tipIn .5s ease-out; }
+  .mk-tip b { display: block; font-size: 1rem; }
+  .mk-tip strong { display: block; color: var(--shu); font-size: 1.15rem; font-weight: 900; margin: 2px 0; }
+  .mk-tip small { display: block; font-size: .85rem; color: var(--muted); }
+  @keyframes tipIn { 0% { transform: scale(.97); box-shadow: 0 0 0 0 rgba(224,168,0,.6); } 60% { box-shadow: 0 0 0 8px rgba(224,168,0,0); } }
   .mk-msg { margin: 8px 0 10px; font-size: .85rem; font-weight: 400; color: var(--muted); min-height: 1.3em; line-height: 1.5; }
   .mk-maps { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .mk-cap { font-weight: 700; font-size: .9rem; margin: 0 0 4px; }
@@ -360,6 +392,10 @@
     </svg>
     <span class="word"><span class="w1">書類印刷</span><span class="w2">システム</span></span>
   </h1>
+  <button class="wiz-open" id="wizOpen" aria-label="質問に答えて書類を選ぶ">
+    <svg viewBox="0 0 32 40" aria-hidden="true"><path d="M2 3 L16 11 V38 L2 30 Z" fill="#FFD400" stroke="#1C2B3A" stroke-width="1.2" stroke-linejoin="round"/><path d="M16 11 L30 3 V30 L16 38 Z" fill="#00A046" stroke="#1C2B3A" stroke-width="1.2" stroke-linejoin="round"/></svg>
+    <span>かんたん選択</span>
+  </button>
 </header>
 <main>
   <section class="att" id="att" hidden>
@@ -427,6 +463,12 @@
     <button id="edClose" class="ask-yes">保存して閉じる</button>
   </div>
 </dialog>
+<dialog id="wiz" aria-labelledby="wizQ">
+  <div class="wiz-top"><span id="wizStep"></span><button class="wiz-back" id="wizBack">ひとつ戻る</button></div>
+  <div class="wiz-bar"><i id="wizBar"></i></div>
+  <div id="wizBody"></div>
+  <button value="cancel" class="ask-x" id="wizX" aria-label="閉じる">×</button>
+</dialog>
 <dialog id="maker" aria-labelledby="mkTitle">
   <div class="ed-head"><strong id="mkTitle">配置図を作る</strong></div>
   <div class="mk-form">
@@ -459,8 +501,8 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="peek" id="peek" aria-hidden="true"></div>
 
-<script src="data.js?v=20261110j"></script>
-<script src="attach.js?v=20261110j"></script>
+<script src="data.js?v=20261110l"></script>
+<script src="attach.js?v=20261110l"></script>
 <script>
 (() => {
   const $ = (s) => document.querySelector(s);
@@ -1029,6 +1071,92 @@
     return s.png();
   }
 
+
+  // ---------- かんたん選択（はい／いいえで必要な書類を選ぶ） ----------
+  const WIZ = [
+    { id: "kind", q: "購入する車は、普通車ですか？軽自動車ですか？", yes: "普通車", no: "軽自動車" },
+    { id: "loan", q: "ローンを使いますか？" },
+    { id: "garage", q: (a) => a.kind ? "車庫証明をこちらで申請しますか？" : "車庫の届出（保管場所の届出）をこちらでしますか？" },
+    { id: "onsite", q: "駐車場は、自宅の敷地内ですか？", when: (a) => a.garage },
+    { id: "ownland", q: "駐車場の土地は、お客様ご本人のものですか？", hint: "ご家族名義の土地や、月極駐車場は「いいえ」", when: (a) => a.garage },
+    { id: "move", q: "引っ越しはありますか？", hint: "車検証や印鑑証明書の住所から、住所が変わっている場合は「はい」" },
+    { id: "move2", q: "引っ越しは2回以上ですか？", when: (a) => a.move },
+    { id: "rename", q: "名字の変更はありますか？", hint: "結婚などで名字が変わった場合は「はい」" },
+    { id: "buy", q: "最後に、買取車両（下取り車）はありますか？" },
+    { id: "lien", q: "買取車両の車検証の所有者は、ローン会社や販売店になっていますか？", hint: "車検証の「所有者」の欄を見てください", when: (a) => a.buy },
+  ];
+  const wiz = $("#wiz");
+  let wa = {}, wpath = [];
+  const wizQs = () => WIZ.filter((w) => !w.when || w.when(wa));
+  function wizResult(a) {
+    const r = [];   // [書類の名前, プルダウンの番号]
+    const add = (name, pick) => { if (!r.some((x) => x[0] === name)) r.push([name, pick]); };
+    add("自動車注文書"); add("免許証コピー（白黒 両面）");
+    if (a.kind) { add("印鑑証明書"); add("委任状", 0); } else add("住民票");
+    if (a.loan) add("ローン振込口座記入用紙");
+    if (a.garage) {
+      add("車庫申請書（1枚のみ）");
+      add("配置図", a.onsite ? 0 : 1);
+      add(a.ownland ? "自認書" : "保管場所使用承諾証明書");
+    }
+    if (a.move) { add("住民票"); if (a.move2) add("戸籍の附票"); }
+    if (a.rename) add("戸籍謄本");
+    if (a.buy) {
+      add("印鑑証明書"); add("委任状", 0); add("譲渡証明書", 0); add("還付書類");
+      if (a.lien) add("所有権解除依頼書");
+    }
+    return r;
+  }
+  function wizShow() {
+    const qs = wizQs(), i = wpath.length;
+    $("#wizBack").style.visibility = i ? "visible" : "hidden";
+    if (i < qs.length) {
+      const w = qs[i], q = typeof w.q === "function" ? w.q(wa) : w.q;
+      $("#wizStep").textContent = `質問 ${i + 1}`;
+      $("#wizBar").style.width = `${(i / qs.length) * 100}%`;
+      $("#wizBody").innerHTML = `<div class="wiz-q"><h3 id="wizQ">${esc(q)}</h3><p class="wiz-hint">${esc(w.hint || "")}</p>
+        <div class="wiz-ans"><button data-v="1">${esc(w.yes || "はい")}</button><button data-v="0">${esc(w.no || "いいえ")}</button></div></div>`;
+      $("#wizBody").querySelector("button").focus();
+      return;
+    }
+    $("#wizStep").textContent = "これで完了です";
+    $("#wizBar").style.width = "100%";
+    const res = wizResult(wa);
+    const label = (n, p) => { const x = items.find((y) => y.name === n); return x && x.choices && p !== undefined ? `${n}（${x.choices[p].name}）` : n; };
+    $("#wizBody").innerHTML = `<div class="wiz-q"><h3 id="wizQ">この書類にチェックを入れます</h3>
+      <ul class="wiz-sum">${res.map(([n, p]) => { const x = items.find((y) => y.name === n);
+        return `<li>${esc(label(n, p))}<small>${x && x.obtain ? "返送リストに載せる" : "印刷する"}</small></li>`; }).join("")}</ul>
+      ${wa.buy ? `<p class="wiz-note">還付書類は「${esc(chosen(items.find((y) => y.name === "還付書類")).name)}」になっています。買取車両の登録が別の県なら、カードのプルダウンで変えてください。</p>` : ""}
+      ${!wa.kind && wa.garage ? `<p class="wiz-note">軽自動車の届出は、地域によって不要な場合があります。</p>` : ""}
+      <div class="wiz-ans sum"><button data-v="apply">この内容でチェックする</button><button data-v="redo">最初からやり直す</button></div></div>`;
+  }
+  $("#wizOpen").addEventListener("click", () => { wa = {}; wpath = []; wizShow(); wiz.showModal(); });
+  $("#wizX").addEventListener("click", () => wiz.close());
+  $("#wizBack").addEventListener("click", () => {
+    const id = wpath.pop(); if (id) delete wa[id];
+    wizShow();
+  });
+  $("#wizBody").addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-v]"); if (!b) return;
+    const v = b.dataset.v;
+    if (v === "redo") { wa = {}; wpath = []; wizShow(); return; }
+    if (v === "apply") {
+      items.forEach((x) => { x.on = false; x.copies = 1; x.withMihon = false; });
+      wizResult(wa).forEach(([n, p]) => {
+        const x = items.find((y) => y.name === n); if (!x) return;
+        x.on = true;
+        if (p !== undefined && x.choices) { if (x.maker && x.pick !== p) x.made = null; x.pick = p; }
+      });
+      render(); wiz.close();
+      document.querySelectorAll(".item.on, .item[data-on='1']").forEach((el) => el.classList.add("fx-on"));
+      toast("必要な書類にチェックを入れました。内容を確認して印刷してください。");
+      return;
+    }
+    const w = wizQs()[wpath.length];
+    wa[w.id] = v === "1"; wpath.push(w.id);
+    wizShow();
+  });
+
   // ---------- 配置図を住所から作る（地図：国土地理院） ----------
   // 用紙（A4横・pt）の中の「所在図記載欄」「配置図記載欄」の位置
   const HZ = { W: 841.89, H: 595.28, L: { x: 59, y: 136.5, w: 343.5, h: 301.5 }, R: { x: 406.5, y: 136.5, w: 343.5, h: 301.5 } };
@@ -1166,7 +1294,7 @@
       }
       if (!isHanare() && pins.park) { pins.park.remove(); delete pins.park; }
       fitPins(); syncR(true); mkUpdate();
-      $("#mkMsg").textContent = "印の先が正しい場所を指しているか確認してください。ずれていたら印をつかんで動かせます。地図は見えている範囲がそのまま印刷されます。";
+      $("#mkMsg").innerHTML = '<span class="mk-tip"><b>印の先が正しい場所を指しているか確認してください。</b><strong>ずれていたら、印をつかんで正しい場所へ動かせます。</strong><small>地図は、見えている範囲がそのまま印刷されます。</small></span>';
     } catch (e) { $("#mkMsg").textContent = e.message; }
   }
 
