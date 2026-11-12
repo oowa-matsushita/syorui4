@@ -336,6 +336,7 @@
   .mk-pin { overflow: visible; }
   .mk-pin svg { display: block; filter: drop-shadow(0 1px 2px rgba(0,0,0,.4)); }
   .mk-pin span { position: absolute; left: calc(100% + 2px); top: 2px; background: #fff; border: 2px solid; border-radius: 3px; padding: 0 5px; font-size: 13px; font-weight: 900; white-space: nowrap; }
+  .grid:has(.mkrow) { align-items: start; }   /* 配置図の作成ボタンで、となりのカードまで縦に伸びないように */
   .mkrow { grid-column: 1 / -1; height: 38px; border: 1px dashed var(--ink); border-radius: 5px; background: var(--sheet); font-weight: 700; font-size: .9rem; }
   .mkrow:hover { background: var(--paper); }
   .mkrow.done { border-style: solid; background: #EEF4EE; }
@@ -500,8 +501,8 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="peek" id="peek" aria-hidden="true"></div>
 
-<script src="data.js?v=20261112a"></script>
-<script src="attach.js?v=20261112a"></script>
+<script src="data.js?v=20261112b"></script>
+<script src="attach.js?v=20261112b"></script>
 <script>
 (() => {
   const $ = (s) => document.querySelector(s);
