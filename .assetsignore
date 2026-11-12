@@ -4,3 +4,7 @@ README.md
 tools
 .git
 .gitignore
+worker.js
+wrangler.jsonc
+.wrangler
+node_modules

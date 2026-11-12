@@ -293,6 +293,10 @@
   .cnt-grid small { display: block; color: var(--muted); font-size: .8rem; }
   .cnt-grid b { font-size: 1.8rem; }
   .cnt-grid span { font-size: .85rem; margin-left: 2px; }
+  .cnt-days { width: 100%; border-collapse: collapse; margin: 4px 0 8px; font-size: .9rem; }
+  .cnt-days th, .cnt-days td { border-bottom: 1px solid var(--line); padding: 4px 8px; text-align: left; }
+  .cnt-days td:last-child, .cnt-days th:last-child { text-align: right; }
+  #cntBody { max-height: 60vh; overflow-y: auto; }
   .cnt-msg { color: var(--muted); font-size: .85rem; margin: 6px 0 12px; }
   /* ---- 配置図を作る ---- */
   #maker { width: min(96vw, 1100px); max-height: 94vh; overflow: auto; padding: 18px 20px 0; }
@@ -501,8 +505,8 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="peek" id="peek" aria-hidden="true"></div>
 
-<script src="data.js?v=20261112c"></script>
-<script src="attach.js?v=20261112c"></script>
+<script src="data.js?v=20261113a"></script>
+<script src="attach.js?v=20261113a"></script>
 <script>
 (() => {
   const $ = (s) => document.querySelector(s);
@@ -917,7 +921,7 @@
     printItems(docs, cover);
   }
 
-  // ---------- 利用回数のカウント（Googleスプレッドシートに1行ずつ記録） ----------
+  // ---------- 利用回数のカウント（Cloudflare の D1 に1行ずつ記録。仕組みは worker.js） ----------
   const CNT_URL = (typeof COUNTER_URL === "string" && COUNTER_URL) || "";
   function countPrint(list) {
     if (!CNT_URL) return;
@@ -939,7 +943,8 @@
         <div><small>今日</small><b>${d.today}</b><span>回</span></div>
         <div><small>今月</small><b>${d.month}</b><span>回</span></div>
         <div><small>合計</small><b>${d.total}</b><span>回</span></div></div>
-        <p class="cnt-msg">印刷ボタンが押された回数です。${d.since ? `（${esc(d.since)}から）` : ""}</p>`;
+        <p class="cnt-msg">印刷ボタンが押された回数です。${d.since ? `（${esc(d.since)}から）` : ""}</p>
+        ${(d.days || []).length ? `<table class="cnt-days"><tr><th>日付</th><th>回数</th></tr>${d.days.map((r) => `<tr><td>${esc(r.day)}</td><td>${Number(r.c)}回</td></tr>`).join("")}</table>` : ""}`;
     } catch (_) { body.innerHTML = '<p class="cnt-msg">回数を読み込めませんでした。少し待ってからもう一度開いてください。</p>'; }
   });
   $("#cntClose").addEventListener("click", () => cnt.close());

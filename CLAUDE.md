@@ -11,7 +11,7 @@
 
 ## 公開先
 - URL：https://syorui4.oowa-matsushita.workers.dev/
-- Cloudflare（Workers の静的サイト）で公開。ビルドなし：リポジトリのファイルがそのまま配信される。
+- Cloudflare（Workers）で公開。ビルドなし：リポジトリのファイルがそのまま配信される（`/api/count` だけ `worker.js` が処理）。
 - 以前は個人の GitHub（yamattt5656/syorui4）＋ GitHub Pages で公開していた（2026年11月に会社用へ移設）。
 
 ## しくみ（ビルドなしの静的サイト）
@@ -21,6 +21,7 @@
 | `data.js` | 書類の一覧と並び順、頭紙の設定、利用回数カウンターのURL。**書類の追加・名前変更はここ** |
 | `attach.js` | 添付書類（ご案内文）の初期文面、会社名・連絡先・振込先（`signature`） |
 | `*.pdf` / `*.jpg` / `*.png` | 印刷する書類と見本。すべて一番上の階層に置く（ファイル名は半角英数字） |
+| `worker.js` / `wrangler.jsonc` | Cloudflare の設定と、利用回数を記録する仕組み（下記） |
 | `tools/kanpu-mihon/` | 還付書類の見本を作る道具（下記） |
 
 外部ライブラリは使うときだけ読み込む：pdf-lib（PDFの結合）、pdf.js（カーソルを乗せたときの縮小表示）、Leaflet（配置図作成の地図）。どれも cdnjs から。
@@ -66,8 +67,10 @@
 - Googleマップへの切り替えは、APIキー（カード登録が必要）と規約確認が要るので保留中。
 
 ## 利用回数カウンター
-- 印刷ボタンが押されるたびに、`COUNTER_URL` に `?action=log&docs=…&n=…` を送る。画面右上の角の見えないボタンで「今日／今月／合計」を表示（`?action=count`）。
-- 記録先は Googleスプレッドシート＋Apps Script（コードは `tools/counter-apps-script.gs`）。会社のGoogleアカウントで作り、ウェブアプリ（実行：自分／アクセス：全員）として公開したURLを `data.js` の `COUNTER_URL` に入れる。**2026年11月時点では未設定。**
+- 印刷ボタンが押されるたびに、`COUNTER_URL`（`/api/count`）に `?action=log&docs=…&n=…` を送る。画面右上の角の見えないボタンで「今日／今月／合計」と日ごとの回数を表示（`?action=count`）。
+- 記録先は Cloudflare の D1（データベース名 `syorui4-count`）。受け取る仕組みは `worker.js`、設定は `wrangler.jsonc`（`database_id` に D1 の ID）。表は初回に自動で作られる。
+- `/api/*` 以外のURLは、これまでどおりリポジトリのファイルをそのまま返す。`worker.js` や `wrangler.jsonc` は `.assetsignore` で配信しない。
+- 以前の Googleスプレッドシート版のコード（`tools/counter-apps-script.gs`）は使っていない（予備として残してある）。
 
 ## これまでの経緯（覚えておくこと）
 - 「かんたん選択」（初心者マーク・はい／いいえで書類を選ぶ）は作ったが、利用者の判断でいったん削除した。最後の版は旧リポジトリのコミット `39e8905`（削除は `24476f9`）。復活させるときは質問の順番：購入車が普通車か軽か → ローン → 車庫証明（敷地内か・本人の土地か）→ 下取りの有無 →（下取りありなら）下取り車が普通車か軽か・所有者・引っ越し・名字変更。

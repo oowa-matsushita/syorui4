@@ -10,9 +10,9 @@
 
 const TITLE = "書類印刷システム";
 
-// 利用回数のカウント（印刷ボタンが押されるたびに Googleスプレッドシートへ記録）
-// Apps Script を「ウェブアプリ」として公開したURLを入れます。空欄ならカウントしません
-const COUNTER_URL = "";
+// 利用回数のカウント（印刷ボタンが押されるたびに Cloudflare のデータベース D1 へ記録）
+// 記録する仕組みは worker.js。空欄ならカウントしません
+const COUNTER_URL = "/api/count";
 
 // 頭紙（返送書類チェックリスト）の設定
 const COVER = {
