@@ -1,0 +1,6 @@
+# Cloudflare で配信しないファイル
+CLAUDE.md
+README.md
+tools
+.git
+.gitignore
