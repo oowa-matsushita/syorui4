@@ -108,6 +108,7 @@ const SECTIONS = [
       // listName … 返送リストに印字する名前（省略すると name がそのまま出ます）
       { name: "自動車注文書", listName: "自動車注文書（ご記入ご捺印の上、2枚目以降を返送）" },
       { name: "ローン振込口座記入用紙" },
+      { name: "振込口座記入用紙", file: "furikomi-kouza.pdf", print: true },   // print: true … この欄でも印刷する
       { name: "免許証コピー（白黒 両面）" },
     ],
   },
@@ -253,12 +254,6 @@ const SECTIONS = [
       { name: "原 智昭", file: "etc-hara.pdf" },
       { name: "原木 浩行", file: "etc-haraki.pdf" },
       { name: "平賀 友章", file: "etc-hiraga.pdf" },
-    ],
-  },
-  {
-    title: "振込口座",
-    items: [
-      { name: "振込口座記入用紙", file: "furikomi-kouza.pdf" },
     ],
   },
 ];

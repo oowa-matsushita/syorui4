@@ -501,8 +501,8 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="peek" id="peek" aria-hidden="true"></div>
 
-<script src="data.js?v=20261112b"></script>
-<script src="attach.js?v=20261112b"></script>
+<script src="data.js?v=20261112c"></script>
+<script src="attach.js?v=20261112c"></script>
 <script>
 (() => {
   const $ = (s) => document.querySelector(s);
@@ -545,7 +545,7 @@
         id: si + "-" + ii, sec: sec.title, name: it.name, file: it.file, on: false, copies: 1,
         mihon: it.mihon, mihonName: it.mihonName || it.name + "（見本）", withMihon: false,
         inList: sec.checklist !== false,
-        obtain: !!sec.obtain,
+        obtain: !!sec.obtain && !it.print,   // print: true なら返送の欄でも印刷する
         listName: it.listName || (sec.listName ? sec.listName.replace("{name}", it.name) : it.name),
       }));
   });
