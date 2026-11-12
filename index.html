@@ -319,6 +319,15 @@
   .mk-cap { font-weight: 700; font-size: .9rem; margin: 0 0 4px; }
   .mk-cap small { font-weight: 400; color: var(--muted); margin-left: 6px; }
   #mkMap, #mkMapR { width: 100%; aspect-ratio: 343.5 / 301.5; border: 1px solid var(--ink); border-radius: 4px; background: var(--paper); }
+  .mk-cap-r { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .mk-blank { margin-left: auto; height: 30px; padding: 0 12px; border: 1.5px solid var(--ink); border-radius: 999px; background: var(--sheet); font-weight: 700; font-size: .82rem; }
+  .mk-blank[aria-pressed="true"] { background: var(--ink); color: #fff; }
+  .mk-blank[aria-pressed="true"]::before { content: "✓ "; }
+  .mk-r-wrap { position: relative; }
+  .mk-r-off { position: absolute; inset: 0; display: none; place-content: center; text-align: center; gap: 4px; background: rgba(255,255,255,.92);
+    border: 1px dashed var(--ink); border-radius: 4px; font-weight: 700; font-size: 1rem; z-index: 1100; }
+  .mk-r-off small { display: block; font-weight: 400; color: var(--muted); font-size: .85rem; }
+  .mk-r-wrap.off .mk-r-off { display: grid; }
   .mk-dist { font-weight: 700; color: var(--shu); min-height: 1.4em; margin: 4px 0 0; font-size: .9rem; }
   .mk-dist.warn { background: #FBEDEB; padding: 2px 8px; border-radius: 4px; }
   .mk-btns { position: sticky; bottom: 0; background: var(--sheet); padding: 12px 0 16px; margin-top: 8px; }
@@ -470,7 +479,9 @@
   <div class="mk-maps">
     <div><div class="mk-cap">所在図 <small>左の欄に印刷</small></div><div id="mkMap"></div>
       <div id="mkDist" class="mk-dist"></div></div>
-    <div><div class="mk-cap">配置図 <small>右の欄に印刷（いちばん拡大した地図）</small></div><div id="mkMapR"></div></div>
+    <div><div class="mk-cap mk-cap-r">配置図 <small>右の欄に印刷（いちばん拡大した地図）</small>
+        <button type="button" id="mkBlankR" class="mk-blank" aria-pressed="false">配置図は白紙にする</button></div>
+      <div class="mk-r-wrap"><div id="mkMapR"></div><div class="mk-r-off" id="mkROff">配置図の欄は白紙で印刷します<small>手書きで記入してください</small></div></div></div>
   </div>
   <div class="ed-btns mk-btns">
     <button id="mkClear" class="ask-no">作成をやめて白紙に戻す</button>
@@ -489,8 +500,8 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="peek" id="peek" aria-hidden="true"></div>
 
-<script src="data.js?v=20261110r"></script>
-<script src="attach.js?v=20261110r"></script>
+<script src="data.js?v=20261112a"></script>
+<script src="attach.js?v=20261112a"></script>
 <script>
 (() => {
   const $ = (s) => document.querySelector(s);
@@ -1204,6 +1215,7 @@
     mkApplyKind();
     const v = x.made && x.made.kind === chosen(x).name ? x.made.inputs : null;
     $("#mkHome").value = v ? v.mkHome : ""; $("#mkPark").value = v ? v.mkPark : "";
+    setBlankR(v && v.blankR);
     $("#mkMsg").textContent = ""; $("#mkDist").textContent = "";
     mk.showModal();
     try { await loadLeaflet(); } catch (e) { $("#mkMsg").textContent = e.message; return; }
@@ -1225,6 +1237,12 @@
   }
 
   // 敷地内／離れ の切り替え（作成画面の上のボタン）
+  const blankR = () => $("#mkBlankR").getAttribute("aria-pressed") === "true";
+  function setBlankR(on) {
+    $("#mkBlankR").setAttribute("aria-pressed", String(!!on));
+    $("#mkROff").parentElement.classList.toggle("off", !!on);
+  }
+  $("#mkBlankR").addEventListener("click", () => setBlankR(!blankR()));
   function mkApplyKind() {
     const hanare = isHanare();
     $("#mkTitle").textContent = "配置図を作る";
@@ -1372,13 +1390,13 @@
     c.width = Math.round(HZ.W * S); c.height = Math.round(HZ.H * S);
     const g = c.getContext("2d"); g.scale(S, S);
     await drawLocation(g, HZ.L);
-    await drawPlace(g, HZ.R);
+    if (!blankR()) await drawPlace(g, HZ.R);   // 白紙にするときは右の欄に何も描かない
     let png;
     try { png = await new Promise((res) => c.toBlob((b) => b.arrayBuffer().then(res), "image/png")); }
     catch (_) { throw new Error("地図を印刷用に変換できませんでした。時間をおいてもう一度お試しください。"); }
     const inputs = { mkHome: $("#mkHome").value, mkPark: $("#mkPark").value,
       home: pins.home.getLatLng(), park: pins.park ? pins.park.getLatLng() : null,
-      center: mapL.getCenter(), zoom: mapL.getZoom(), centerR: mapR.getCenter(), zoomR: mapR.getZoom() };
+      center: mapL.getCenter(), zoom: mapL.getZoom(), centerR: mapR.getCenter(), zoomR: mapR.getZoom(), blankR: blankR() };
     return { png, kind: chosen(mkItem).name, inputs };
   }
 
