@@ -176,7 +176,7 @@ const SECTIONS = [
     items: [
       { group: "東海・北陸・近畿", name: "愛知県",   file: "kanpu-aichi.pdf", mihon: "mihon-kanpu-aichi.jpg", mihonName: "還付書類（愛知県）（見本）", note: "印鑑証明書：コピー可（等倍）／発行から12か月以内" },
       { group: "東海・北陸・近畿", name: "静岡県",   file: "kanpu-shizuoka.pdf", default: true, mihon: "mihon-kanpu-shizuoka.jpg", mihonName: "還付書類（静岡県）（見本）", note: "印鑑証明書：コピーを添付（譲渡日の6か月以上前に発行されたものは不可）" },   // 最初に選ばれる県
-      { group: "東海・北陸・近畿", name: "三重県",   file: "kanpu-mie.pdf", mihon: "mihon-kanpu-mie.jpg", mihonName: "還付書類（三重県）（見本）", note: "印鑑証明書：コピー可／発行後1年以内（領収証書の原本を付ける場合は認印でも可）" },
+      { group: "東海・北陸・近畿", name: "三重県",   file: "kanpu-mie.pdf", mihon: "mihon-kanpu-mie.jpg", mihonName: "還付書類（三重県）（見本）", note: "印鑑証明書：コピーでOK／発行後1年以内" },
       { group: "東海・北陸・近畿", name: "岐阜県",   file: "kanpu-gifu.pdf", mihon: "mihon-kanpu-gifu.jpg", mihonName: "還付書類（岐阜県）（見本）", note: "印鑑証明書：等倍コピー可（スキャン後のコピーは不可）／発行から1年以内" },
       { group: "東海・北陸・近畿", name: "富山県",   file: "toyama.pdf", note: "様式に印鑑証明書の記載なし／押印はシャチハタ不可" },
       { group: "東海・北陸・近畿", name: "石川県",   file: "ishikawa.pdf", mihon: "mihon-kanpu-ishikawa.jpg", mihonName: "還付書類（石川県）（見本）", note: "印鑑証明書：コピー可／発行から12か月以内" },
