@@ -378,6 +378,100 @@
     .item, .one, .go, .clear, .mchip, .stepper button, .chip { transition: none !important; }
     .item.fx-on, .item.fx-on .mark, .item.fx-on .mark::after, .item.fx-off .mark, .mchip.fx .mbox, .stepper output.fx, .count.fx strong, .ripple { animation: none !important; }
   }
+  /* =====================================================================
+     見た目の調整（2026年11月）… 配置や操作はそのまま、色・線・余白だけを整える
+     ===================================================================== */
+  :root {
+    --paper: #E9EDEA;      /* 車検証のような、うすい青みがかった用紙色 */
+    --sheet: #FFFFFF;
+    --ink: #1B2A4A;        /* 藍 */
+    --muted: #5F6B78;
+    --line: #D3D9DF;
+    --shu: #C23A2B;        /* 朱（注意書きと印刷ボタン） */
+    --sel: #EEF2F9;        /* 選んだカードの地色 */
+    --r: 10px;
+  }
+  body { -webkit-font-smoothing: antialiased; }
+
+  header { background: var(--sheet); border-bottom: 1px solid var(--line); box-shadow: inset 0 -3px 0 var(--ink); }
+  .logo .w1 { letter-spacing: .14em; }
+  .logo .w2 { letter-spacing: .14em; }
+
+  /* 欄の見出し：用紙の項目名のように、左に藍の帯 */
+  section { margin-top: 30px; }
+  section h2 {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 1rem; letter-spacing: .08em; margin: 0 0 12px; padding: 0 0 8px;
+    border-bottom: 1px solid var(--line);
+  }
+  section h2::before { content: ""; width: 5px; height: 1.1em; border-radius: 2px; background: var(--ink); flex: none; }
+  section.subsec { border-left: 2px solid var(--line); }
+  section.subsec h3 { letter-spacing: .08em; }
+
+  /* カード：枠は細く、選んだら藍の帯と地色で分かるように */
+  .grid { gap: 10px 12px; }
+  .item, .att-head {
+    border: 1px solid var(--line); border-radius: var(--r);
+    box-shadow: 0 1px 0 rgba(27, 42, 74, .06);
+  }
+  .item:hover, .att-head:hover { border-color: #A9B3BE; }
+  .item.on, .item[data-on="1"], .att.on .att-head {
+    border-color: var(--ink); background: var(--sel);
+    box-shadow: inset 4px 0 0 var(--ink);
+  }
+  .att.on .att-head { border-radius: var(--r) var(--r) 0 0; }
+  .att-body { border-width: 1px; }
+  .item.none { box-shadow: none; }
+  .mark { border-radius: 6px; border-width: 1.5px; border-color: #AEB7C1; }
+  .item.on .mark, .item[data-on="1"] .mark { border-color: var(--ink); }
+
+  .pick select { border-width: 1px; border-color: #9AA5B1; border-radius: 6px; }
+  .item.on .pick select, .item[data-on="1"] .pick select { border-color: var(--ink); }
+  .pick-note { background: #F3F5F4; border-radius: 6px; }
+  .item.on .pick-note, .item[data-on="1"] .pick-note { background: var(--sheet); }
+
+  .stepper { border-radius: 6px; background: var(--sheet); }
+  .stepper output { font-variant-numeric: tabular-nums; }
+  .one, .mchip { border-radius: 6px; }
+  .one { border-color: #9AA5B1; }
+  .one:hover { border-color: var(--ink); }
+  .mchip { background: var(--sheet); }
+  .mkrow { border-radius: 6px; border-color: #9AA5B1; }
+
+  .note { border-left-width: 2px; }
+
+  /* 下の操作バー：画面の下に浮かぶ1本の帯にして、印刷ボタンだけ朱に */
+  body { padding-bottom: calc(118px + env(safe-area-inset-bottom, 0px)); }
+  .bar {
+    left: 50%; right: auto; bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%); width: min(1032px, calc(100% - 28px));
+    border-radius: 14px; padding: 10px 10px 10px 22px; gap: 18px;
+    justify-content: flex-end;
+    box-shadow: 0 10px 30px rgba(27, 42, 74, .28), 0 2px 6px rgba(27, 42, 74, .18);
+  }
+  .bar .cover-opt { margin-right: auto; font-weight: 400; }
+  .count { font-variant-numeric: tabular-nums; }
+  .clear { border-radius: 9px; border-color: rgba(255,255,255,.35); }
+  .go {
+    height: 52px; padding: 0 40px; border-radius: 9px;
+    background: var(--shu); color: #fff; letter-spacing: .2em; font-size: 1.1rem;
+  }
+  .go:disabled { background: rgba(255,255,255,.18); color: rgba(255,255,255,.75); opacity: 1; }
+  .go:not(:disabled):hover { box-shadow: 0 6px 16px rgba(194, 58, 43, .45); }
+  .toast { bottom: calc(108px + env(safe-area-inset-bottom, 0px)); border-radius: 10px; box-shadow: 0 6px 18px rgba(27, 42, 74, .16); }
+  @media (max-width: 640px) {
+    .bar { padding: 10px 10px 10px 14px; gap: 10px; justify-content: space-between; }
+    .bar .cover-opt { margin-right: 0; }
+    .go { padding: 0 26px; }
+    body { padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px)); }
+    .toast { bottom: calc(150px + env(safe-area-inset-bottom, 0px)); }
+  }
+
+  /* ダイアログ */
+  dialog { border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 20px 50px rgba(27, 42, 74, .3); }
+  dialog::backdrop { background: rgba(27, 42, 74, .5); }
+  .ask-btns button, .ed-btns button, .att-save { border-radius: 9px; }
+  .peek { border-color: var(--line); border-radius: 10px; }
 </style>
 </head>
 <body>
@@ -385,10 +479,10 @@
 <header>
   <h1 id="title" class="logo" aria-label="書類印刷システム">
     <svg class="lmark" viewBox="0 0 40 40" aria-hidden="true">
-      <rect x="1" y="1" width="38" height="38" rx="9" fill="#1C2B3A"/>
+      <rect x="1" y="1" width="38" height="38" rx="9" fill="#1B2A4A"/>
       <path d="M14 9h10l6 6v13a2 2 0 0 1-2 2H14a2 2 0 0 1-2-2V11a2 2 0 0 1 2-2z" fill="#fff"/>
-      <path d="M24 9v6h6" fill="none" stroke="#1C2B3A" stroke-width="1.6" stroke-linejoin="round"/>
-      <path d="M15.5 21.5l3 3 6-6.5" fill="none" stroke="#1C2B3A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M24 9v6h6" fill="none" stroke="#1B2A4A" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M15.5 21.5l3 3 6-6.5" fill="none" stroke="#1B2A4A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
       <rect x="9" y="31.5" width="22" height="2.4" rx="1.2" fill="#fff" opacity=".55"/>
     </svg>
     <span class="word"><span class="w1">書類印刷</span><span class="w2">システム</span></span>
