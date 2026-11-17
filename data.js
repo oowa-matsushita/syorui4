@@ -42,6 +42,11 @@ const PRINT_ORDER = [
   "譲渡証明書",
   "譲渡証明書（個人）（見本）",
   "譲渡証明書（法人）（見本）",
+  "申請依頼書",                  // 軽自動車用。購入・下取り × 個人・法人のプルダウン
+  "申請依頼書（購入・個人）（見本）",
+  "申請依頼書（購入・法人）（見本）",
+  "申請依頼書（下取・個人）（見本）",
+  "申請依頼書（下取・法人）（見本）",
   "所有権解除依頼書",
   "所有権解除依頼書（見本）",
   "還付書類",                    // 都道府県のプルダウン
@@ -142,6 +147,13 @@ const SECTIONS = [
       { name: "譲渡証明書", choices: [
         { name: "個人", file: "joto.pdf", mihon: "mihon-joto.jpg",        mihonName: "譲渡証明書（個人）（見本）" },
         { name: "法人", file: "joto.pdf", mihon: "mihon-joto-houjin.jpg", mihonName: "譲渡証明書（法人）（見本）" },
+      ] },
+      // 軽自動車の委任状にあたる書類。見本は tools/shinsei-irai/make.js で作る（押印なし・記入だけ）
+      { name: "申請依頼書", listName: "申請依頼書・軽（{name}）", choices: [
+        { name: "購入・個人",   file: "shinsei-irai.pdf", mihon: "mihon-shinsei-irai-kounyu.jpg",           mihonName: "申請依頼書（購入・個人）（見本）" },
+        { name: "購入・法人",   file: "shinsei-irai.pdf", mihon: "mihon-shinsei-irai-kounyu-houjin.jpg",    mihonName: "申請依頼書（購入・法人）（見本）" },
+        { name: "下取・個人",   file: "shinsei-irai.pdf", mihon: "mihon-shinsei-irai-shitadori.jpg",        mihonName: "申請依頼書（下取・個人）（見本）" },
+        { name: "下取・法人",   file: "shinsei-irai.pdf", mihon: "mihon-shinsei-irai-shitadori-houjin.jpg", mihonName: "申請依頼書（下取・法人）（見本）" },
       ] },
       { name: "所有権解除依頼書",       file: "shoyuken-kaijo.pdf", mihon: "mihon-shoyuken-kaijo.png", mihonName: "所有権解除依頼書（見本）" },
     ],
