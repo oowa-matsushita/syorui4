@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>車庫証明の提出の仕方</title>
+<!--
+  お客様向け「車庫証明の提出の仕方」の元になるページです。
+  文章を直したら、リポジトリの一番上で次を実行すると shako-teishutsu.pdf が作り直されます。
+    node tools/shako-teishutsu/make.js
+-->
+<style>
+  @font-face { font-family: "UDG"; font-weight: 400; src: url(fonts/biz-udpgothic-latin-400-normal.woff2) format("woff2"); unicode-range: U+0000-00FF, U+2000-206F; }
+  @font-face { font-family: "UDG"; font-weight: 700; src: url(fonts/biz-udpgothic-latin-700-normal.woff2) format("woff2"); unicode-range: U+0000-00FF, U+2000-206F; }
+  @font-face { font-family: "UDG"; font-weight: 400; src: url(fonts/biz-udpgothic-japanese-400-normal.woff2) format("woff2"); }
+  @font-face { font-family: "UDG"; font-weight: 700; src: url(fonts/biz-udpgothic-japanese-700-normal.woff2) format("woff2"); }
+
+  @page { size: A4; margin: 0; }
+  :root {
+    --ink: #1B2A4A;      /* 藍：見出し・手順 */
+    --text: #222831;
+    --muted: #5F6B78;
+    --line: #C9D0D7;
+    --shu: #C23A2B;      /* 朱：持っていくもの・大事なところ */
+    --shu-bg: #FBEFED;
+    --wash: #EEF2F9;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    width: 210mm; height: 297mm; padding: 13mm 16mm 11mm;
+    font-family: "UDG", sans-serif; color: var(--text);
+    font-size: 10.5pt; line-height: 1.65;
+    display: flex; flex-direction: column;
+  }
+  body > * { flex-shrink: 0;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  p { margin: 0; }
+
+  /* ---- タイトル ---- */
+  .head { display: flex; align-items: flex-end; justify-content: space-between; gap: 8mm;
+    padding-bottom: 4mm; border-bottom: 1.2mm solid var(--ink); }
+  .head h1 { margin: 0; font-size: 24pt; line-height: 1.2; letter-spacing: .08em; color: var(--ink); }
+  .head p { font-size: 9.5pt; color: var(--muted); text-align: right; }
+
+  /* ---- 持っていくもの ---- */
+  .bring { margin-top: 5mm; border: .6mm solid var(--shu); border-radius: 3mm; overflow: hidden; }
+  .bring-head { display: flex; align-items: baseline; gap: 4mm; padding: 2.6mm 5mm; background: var(--shu); color: #fff; }
+  .bring-head h2 { margin: 0; font-size: 14pt; letter-spacing: .06em; }
+  .bring-head span { font-size: 9.5pt; font-weight: 700; }
+  .bring ul { list-style: none; margin: 0; padding: 0 5mm; }
+  .bring li { display: grid; grid-template-columns: 7mm 1fr; column-gap: 3mm; padding: 2.4mm 0; }
+  .bring li + li { border-top: .25mm dashed var(--line); }
+  .box { width: 5.2mm; height: 5.2mm; border: .5mm solid var(--text); border-radius: .8mm; margin-top: .9mm; }
+  .bring h3 { margin: 0; font-size: 12pt; line-height: 1.5; }
+  .bring h3 .or { font-weight: 400; font-size: 10pt; margin: 0 1.5mm; }
+  .bring .d { color: var(--muted); font-size: 9.5pt; }
+
+  .which { margin-top: 2mm; border-radius: 2mm; background: var(--shu-bg); padding: 2.4mm 4mm; display: grid; grid-template-columns: auto auto 1fr; column-gap: 3mm; row-gap: 1.6mm; align-items: baseline; }
+  .which .k { font-size: 9.5pt; font-weight: 700; }
+  .which .a { color: var(--shu); font-weight: 700; font-size: 12pt; line-height: 1; }
+  .which .v b { font-size: 10.5pt; }
+  .which .v span { font-size: 9.5pt; }
+  .which .v small { display: block; color: var(--muted); font-size: 9pt; line-height: 1.55; }
+
+  /* ---- 手順 ---- */
+  .steps-title { margin: 6mm 0 0; font-size: 12pt; color: var(--ink); letter-spacing: .06em; }
+  .steps { list-style: none; margin: 0; padding: 0; counter-reset: s; }
+  .steps li { position: relative; display: grid; grid-template-columns: 10mm 1fr; column-gap: 4mm; padding: 2.4mm 0 2.6mm; counter-increment: s; }
+  /* 番号どうしを縦の線でつなぐ */
+  .steps li::after { content: ""; position: absolute; left: 4.75mm; top: 13mm; bottom: -1mm; width: .5mm; background: var(--line); }
+  .steps li:last-child::after { display: none; }
+  .num { width: 10mm; height: 10mm; border-radius: 50%; background: var(--ink); color: #fff;
+    display: grid; place-items: center; font-weight: 700; font-size: 13pt; line-height: 1; }
+  .num::before { content: counter(s); }
+  .steps h3 { margin: 1.4mm 0 .4mm; font-size: 13pt; line-height: 1.4; color: var(--ink); }
+  .steps .sub { color: var(--muted); font-size: 9.5pt; margin-top: .6mm; }
+  .mark { font-weight: 700; background: linear-gradient(transparent 62%, #F4C9C3 62%); }
+  .when { display: inline-block; margin-left: 2mm; padding: .2mm 2.2mm; border: .3mm solid var(--ink); border-radius: 1mm; font-size: 9pt; font-weight: 700; color: var(--ink); vertical-align: .4mm; }
+
+  /* ---- 下 ---- */
+  .foot { margin-top: auto; display: flex; justify-content: space-between; align-items: flex-end; gap: 6mm;
+    padding-top: 3mm; border-top: .3mm solid var(--line); font-size: 9pt; color: var(--muted); }
+  .foot .co { text-align: right; color: var(--text); }
+  .foot .co b { display: block; font-size: 10.5pt; }
+</style>
+</head>
+<body>
+
+<header class="head">
+  <h1>車庫証明の提出の仕方</h1>
+  <p>お客様ご自身で警察署に<br>申請していただく場合の流れです</p>
+</header>
+
+<section class="bring">
+  <div class="bring-head"><h2>警察署に持っていくもの</h2><span>下記がすべて必要です</span></div>
+  <ul>
+    <li><span class="box"></span><div>
+      <h3>車両情報</h3>
+      <p class="d">車名・型式・車台番号・自動車の大きさ。同封させていただきます。</p>
+    </div></li>
+    <li><span class="box"></span><div>
+      <h3>自認書<span class="or">もしくは</span>保管場所使用承諾証明書</h3>
+      <p class="d">駐車場の土地によってどちらか1枚</p>
+      <div class="which">
+        <span class="k">自分の土地</span><span class="a">→</span>
+        <span class="v"><b>自認書</b>　<span>ご記入のうえお持ちください。</span></span>
+        <span class="k">自分以外の土地</span><span class="a">→</span>
+        <span class="v"><b>保管場所使用承諾証明書</b>
+          <small>月極駐車場・ご家族名義の土地など。駐車場の管理会社や大家さん、土地の所有者にご記入いただいてからお持ちください。</small></span>
+      </div>
+    </div></li>
+    <li><span class="box"></span><div>
+      <h3>配置図</h3>
+      <p class="d">地図を書いておくとスムーズです。GoogleMapの印刷で対応できる警察署もあります。</p>
+    </div></li>
+    <li><span class="box"></span><div>
+      <h3>現金</h3>
+      <p class="d">申請の手数料です。金額は管轄の警察署によって異なります。</p>
+    </div></li>
+  </ul>
+</section>
+
+<h2 class="steps-title">提出から受け取りまでの流れ</h2>
+<ol class="steps">
+  <li><span class="num"></span><div>
+    <h3>持っていく書類を準備する</h3>
+    <p>車庫申請書（自動車保管場所証明申請書）は警察署の窓口に置いてあります。<br>その場でご記入ください。</p>
+    <p>記入に必要な車両情報は、<span class="mark">同封させていただきます。</span>そのまま書き写してください。</p>
+  </div></li>
+  <li><span class="num"></span><div>
+    <h3>警察署に提出する</h3>
+    <p>駐車場の場所を管轄する警察署の窓口に提出します。<span class="mark">現金をお持ちください。</span></p>
+    <p class="sub">平日の受付時間内にお願いします。</p>
+  </div></li>
+  <li><span class="num"></span><div>
+    <h3>受け取りに行く<span class="when">約1週間後</span></h3>
+    <p>交付までおおよそ1週間かかります。同じ警察署で受け取ってください。</p>
+    <p class="sub">受け取りの際にも現金が必要な場合があります。</p>
+  </div></li>
+  <li><span class="num"></span><div>
+    <h3>松下モータースへご送付ください</h3>
+    <p>受け取った車庫証明一式を、そのままご送付ください。</p>
+    <p class="sub">届き次第、登録の手続きを進めます。</p>
+  </div></li>
+</ol>
+
+<footer class="foot">
+  <p>ご不明な点は、担当スタッフまでお気軽にお問い合わせください。</p>
+  <p class="co"><b>有限会社　松下モータース</b>TEL 0537-72-2583</p>
+</footer>
+
+</body>
+</html>
