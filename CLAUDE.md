@@ -23,6 +23,7 @@
 | `*.pdf` / `*.jpg` / `*.png` | 印刷する書類と見本。すべて一番上の階層に置く（ファイル名は半角英数字） |
 | `worker.js` / `wrangler.jsonc` | Cloudflare の設定と、利用回数を記録する仕組み（下記） |
 | `tools/kanpu-mihon/` | 還付書類の見本を作る道具（下記） |
+| `tools/shako-teishutsu/` | お客様向け「車庫証明の提出の仕方」（`shako-teishutsu.pdf`）の元のページ。文章を直したら `node tools/shako-teishutsu/make.js` でPDFを作り直す（藍色1色・BIZ UDPゴシックを埋め込み） |
 
 外部ライブラリは使うときだけ読み込む：pdf-lib（PDFの結合）、pdf.js（カーソルを乗せたときの縮小表示）、Leaflet（配置図作成の地図）。どれも cdnjs から。
 
