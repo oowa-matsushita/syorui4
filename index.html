@@ -599,8 +599,8 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="peek" id="peek" aria-hidden="true"></div>
 
-<script src="data.js?v=20261116a"></script>
-<script src="attach.js?v=20261113a"></script>
+<script src="data.js?v=20261117a"></script>
+<script src="attach.js?v=20261117a"></script>
 <script>
 (() => {
   const $ = (s) => document.querySelector(s);
@@ -678,7 +678,13 @@
     if (cust) blocks.push(cust + "様");
     blocks.push(A.greeting.join("\n").replace(/\{name\}/g, att.staff));
     // 選んだ文章は分類（group）ごとに見出しを付けてまとめる
-    const picked = A.texts.filter((t) => att.picks.includes(t.name));
+    let picked = A.texts.filter((t) => att.picks.includes(t.name));
+    // 組み合わせ（combos）が全部選ばれていたら、最初の文章の位置にまとめた文章を1つだけ入れる
+    (A.combos || []).forEach((c) => {
+      if (!c.when.every((n) => picked.some((t) => t.name === n))) return;
+      const first = picked.find((t) => c.when.includes(t.name));
+      picked = picked.flatMap((t) => t === first ? [{ group: t.group, name: c.when.join("＋"), text: c.text }] : c.when.includes(t.name) ? [] : [t]);
+    });
     [...new Set(picked.map((t) => t.group))].forEach((grp) => {
       const head = (A.headings && A.headings[grp]) || grp;
       blocks.push("■" + head + "\n" + picked.filter((t) => t.group === grp).map((t) => t.text.trim()).join("\n"));
