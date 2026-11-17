@@ -20,8 +20,6 @@
     --text: #222831;
     --muted: #5F6B78;
     --line: #C9D0D7;
-    --shu: #C23A2B;      /* 朱：持っていくもの・大事なところ */
-    --shu-bg: #FBEFED;
     --wash: #EEF2F9;
   }
   * { box-sizing: border-box; }
@@ -44,8 +42,8 @@
   .head p { font-size: 9.5pt; color: var(--muted); text-align: right; }
 
   /* ---- 持っていくもの ---- */
-  .bring { margin-top: 5mm; border: .6mm solid var(--shu); border-radius: 3mm; overflow: hidden; }
-  .bring-head { display: flex; align-items: baseline; gap: 4mm; padding: 2.6mm 5mm; background: var(--shu); color: #fff; }
+  .bring { margin-top: 5mm; border: .6mm solid var(--ink); border-radius: 3mm; overflow: hidden; }
+  .bring-head { display: flex; align-items: baseline; gap: 4mm; padding: 2.6mm 5mm; background: var(--ink); color: #fff; }
   .bring-head h2 { margin: 0; font-size: 14pt; letter-spacing: .06em; }
   .bring-head span { font-size: 9.5pt; font-weight: 700; }
   .bring ul { list-style: none; margin: 0; padding: 0 5mm; }
@@ -56,9 +54,9 @@
   .bring h3 .or { font-weight: 400; font-size: 10pt; margin: 0 1.5mm; }
   .bring .d { color: var(--muted); font-size: 9.5pt; }
 
-  .which { margin-top: 2mm; border-radius: 2mm; background: var(--shu-bg); padding: 2.4mm 4mm; display: grid; grid-template-columns: auto auto 1fr; column-gap: 3mm; row-gap: 1.6mm; align-items: baseline; }
+  .which { margin-top: 2mm; border-radius: 2mm; background: var(--wash); padding: 2.4mm 4mm; display: grid; grid-template-columns: auto auto 1fr; column-gap: 3mm; row-gap: 1.6mm; align-items: baseline; }
   .which .k { font-size: 9.5pt; font-weight: 700; }
-  .which .a { color: var(--shu); font-weight: 700; font-size: 12pt; line-height: 1; }
+  .which .a { color: var(--ink); font-weight: 700; font-size: 12pt; line-height: 1; }
   .which .v b { font-size: 10.5pt; }
   .which .v span { font-size: 9.5pt; }
   .which .v small { display: block; color: var(--muted); font-size: 9pt; line-height: 1.55; }
@@ -75,7 +73,7 @@
   .num::before { content: counter(s); }
   .steps h3 { margin: 1.4mm 0 .4mm; font-size: 13pt; line-height: 1.4; color: var(--ink); }
   .steps .sub { color: var(--muted); font-size: 9.5pt; margin-top: .6mm; }
-  .mark { font-weight: 700; background: linear-gradient(transparent 62%, #F4C9C3 62%); }
+  .mark { font-weight: 700; background: linear-gradient(transparent 62%, #CBD6EC 62%); }
   .when { display: inline-block; margin-left: 2mm; padding: .2mm 2.2mm; border: .3mm solid var(--ink); border-radius: 1mm; font-size: 9pt; font-weight: 700; color: var(--ink); vertical-align: .4mm; }
 
   /* ---- 下 ---- */
