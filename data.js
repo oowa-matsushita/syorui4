@@ -92,6 +92,19 @@ const PRINT_ORDER = [
   "還付書類（秋田県）（見本）",
   "還付書類（山形県）（見本）",
   "還付書類（福島県）（見本）",
+  "名義人の印鑑証明書",          // ここから「下取りが別名義の場合」
+  "委任状（名義人）",
+  "委任状（名義人・個人）（見本）",
+  "委任状（名義人・法人）（見本）",
+  "譲渡証明書（名義人）",
+  "譲渡証明書（名義人・個人）（見本）",
+  "譲渡証明書（名義人・法人）（見本）",
+  "申請依頼書（名義人）",
+  "申請依頼書（名義人・個人）（見本）",
+  "申請依頼書（名義人・法人）（見本）",
+  "戸籍謄本（相続）",
+  "遺産分割協議書",
+  "相続人の印鑑証明書",
   "車庫証明の提出の仕方",
   "車庫申請書（1枚のみ）",
   "配置図",                      // 敷地内・離れてる場合のプルダウン
@@ -156,6 +169,45 @@ const SECTIONS = [
         { name: "下取・法人",   file: "shinsei-irai.pdf", mihon: "mihon-shinsei-irai-shitadori-houjin.jpg", mihonName: "申請依頼書（下取・法人）（見本）" },
       ] },
       { name: "所有権解除依頼書",       file: "shoyuken-kaijo.pdf", mihon: "mihon-shoyuken-kaijo.png", mihonName: "所有権解除依頼書（見本）" },
+    ],
+  },
+  {
+    // fold: true … 見出しのボタンを押すと開く欄（中の書類を選ぶと開いたままになります）
+    // coverGroup … 頭紙ではこの見出しの下にまとめて載ります
+    // key … 画面の名前がほかの欄と同じとき、印刷順（PRINT_ORDER）で区別するための名前
+    title: "下取りが別名義の場合の書類案内",
+    fold: true,
+    coverGroup: "下取り車両が別名義の場合",
+    items: [
+      { name: "名義人の印鑑証明書", obtain: true },   // 印刷はせず頭紙にだけ載せる
+      { name: "委任状", key: "委任状（名義人）", listName: "委任状（名義人の実印）（{name}）", choices: [
+        { name: "個人", file: "ininjo.pdf", mihon: "mihon-ininjo.jpg",        mihonName: "委任状（名義人・個人）（見本）" },
+        { name: "法人", file: "ininjo.pdf", mihon: "mihon-ininjo-houjin.jpg", mihonName: "委任状（名義人・法人）（見本）" },
+      ] },
+      { name: "譲渡証明書", key: "譲渡証明書（名義人）", listName: "譲渡証明書（名義人の実印）（{name}）", choices: [
+        { name: "個人", file: "joto.pdf", mihon: "mihon-joto.jpg",        mihonName: "譲渡証明書（名義人・個人）（見本）" },
+        { name: "法人", file: "joto.pdf", mihon: "mihon-joto-houjin.jpg", mihonName: "譲渡証明書（名義人・法人）（見本）" },
+      ] },
+      { name: "申請依頼書", key: "申請依頼書（名義人）", listName: "申請依頼書（名義人が記入）（{name}）", choices: [
+        { name: "軽・個人", file: "shinsei-irai.pdf", mihon: "mihon-shinsei-irai-shitadori.jpg",        mihonName: "申請依頼書（名義人・個人）（見本）" },
+        { name: "軽・法人", file: "shinsei-irai.pdf", mihon: "mihon-shinsei-irai-shitadori-houjin.jpg", mihonName: "申請依頼書（名義人・法人）（見本）" },
+      ] },
+    ],
+  },
+  {
+    // 上の「下取りが別名義」の欄の中の小見出し（foldIn の欄が開いているときだけ出ます）
+    title: "名義人が亡くなっている場合（相続）",
+    sub: true,
+    foldIn: "下取りが別名義の場合の書類案内",
+    obtain: true,       // 印刷はせず、頭紙にだけ載せる
+    coverGroup: "下取り車両が別名義の場合",
+    items: [
+      { name: "戸籍謄本（相続）", listName: "戸籍謄本（亡くなった方の死亡と、相続人が分かるもの）" },
+      { name: "遺産分割協議書", listName: "遺産分割協議書（相続人全員の実印）" },
+      { name: "相続人の印鑑証明書" },
+      // checklist: false … 返送リストには載せず、coverNote の注意書きだけを頭紙に入れる
+      { name: "注意書き（相続人の実印で）", checklist: false,
+        coverNote: "下取り車両の名義人が亡くなっている場合、委任状・譲渡証明書には、車を相続する方の実印を押してください。" },
     ],
   },
   {

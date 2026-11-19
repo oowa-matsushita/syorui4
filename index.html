@@ -467,6 +467,20 @@
     .toast { bottom: calc(150px + env(safe-area-inset-bottom, 0px)); }
   }
 
+  /* 開く欄（下取りが別名義の場合 など） */
+  section.fold h2 { padding: 0; border-bottom: none; }
+  section.fold h2::before { display: none; }
+  .fold-btn {
+    width: 100%; display: flex; align-items: center; gap: 10px; text-align: left;
+    padding: 12px 14px; border: 1px dashed #9AA5B1; border-radius: var(--r); background: var(--sheet);
+    font-weight: 700; font-size: 1rem; letter-spacing: .08em; color: var(--ink);
+  }
+  .fold-btn::before { content: ""; width: 5px; height: 1.1em; border-radius: 2px; background: var(--ink); flex: none; }
+  .fold-btn:hover { border-color: var(--ink); }
+  .fold-btn[aria-expanded="true"] { border-style: solid; border-color: var(--ink); margin-bottom: 12px; }
+  .fold-mark { margin-left: auto; font-size: .85rem; letter-spacing: .04em; padding: 2px 12px; border-radius: 999px; background: var(--ink); color: #fff; }
+  .fold-btn[aria-expanded="true"] .fold-mark { background: var(--sheet); color: var(--ink); border: 1px solid var(--ink); }
+
   /* ダイアログ */
   dialog { border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 20px 50px rgba(27, 42, 74, .3); }
   dialog::backdrop { background: rgba(27, 42, 74, .5); }
@@ -599,7 +613,7 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="peek" id="peek" aria-hidden="true"></div>
 
-<script src="data.js?v=20261117b"></script>
+<script src="data.js?v=20261119a"></script>
 <script src="attach.js?v=20261117a"></script>
 <script>
 (() => {
@@ -635,16 +649,17 @@
     sec.items.forEach((it, ii) => it.choices
       // 書類の中のプルダウン（例：委任状 → 個人／法人）
       ? items.push({
-        id: si + "-" + ii, sec: sec.title, key: it.name, name: it.name, on: false, copies: 1,
+        id: si + "-" + ii, sec: sec.title, key: it.key || it.name, name: it.name, on: false, copies: 1,
         inList: sec.checklist !== false, choices: it.choices, pick: 0, withMihon: false, maker: !!it.maker,
         tmpl: it.listName || it.name + "（{name}）",
       })
       : items.push({
         id: si + "-" + ii, sec: sec.title, name: it.name, file: it.file, on: false, copies: 1,
         mihon: it.mihon, mihonName: it.mihonName || it.name + "（見本）", withMihon: false,
-        inList: sec.checklist !== false,
-        obtain: !!sec.obtain && !it.print,   // print: true なら返送の欄でも印刷する
+        inList: sec.checklist !== false && it.checklist !== false,
+        obtain: (!!sec.obtain || !!it.obtain) && !it.print,   // print: true なら返送の欄でも印刷する
         listName: it.listName || (sec.listName ? sec.listName.replace("{name}", it.name) : it.name),
+        coverNote: it.coverNote,
       }));
   });
   const chosen = (x) => (x.choices ? x.choices[x.pick] : null);
@@ -865,13 +880,22 @@
     </div>`;
   }
 
+  // 開く欄（fold: true）：ボタンで開け閉めする。中の書類が選ばれていれば開いたまま
+  const foldOpen = new Set();
+  const foldHasOn = (title) => items.some((x) => x.on && (x.sec === title || (SECTIONS.find((s) => s.title === x.sec) || {}).foldIn === title));
+  const isFoldOpen = (title) => foldOpen.has(title) || foldHasOn(title);
+
   function render() {
-    $("#main").innerHTML = SECTIONS.map((sec) => `
-      <section class="${sec.sub ? "subsec" : ""}">
-        ${sec.sub ? `<h3>${esc(sec.title)}</h3>` : `<h2>${esc(sec.title)}</h2>`}
+    $("#main").innerHTML = SECTIONS.map((sec) => {
+      if (sec.foldIn && !isFoldOpen(sec.foldIn)) return "";
+      const head = sec.fold
+        ? `<h2><button type="button" class="fold-btn" data-fold="${esc(sec.title)}" aria-expanded="${isFoldOpen(sec.title)}">${esc(sec.title)}<span class="fold-mark">${isFoldOpen(sec.title) ? "閉じる" : "開く"}</span></button></h2>`
+        : sec.sub ? `<h3>${esc(sec.title)}</h3>` : `<h2>${esc(sec.title)}</h2>`;
+      const body = sec.fold && !isFoldOpen(sec.title) ? "" : `
         <div class="grid">${items.filter((x) => x.sec === sec.title).map(itemHtml).join("")}</div>
-        ${sec.note ? `<ul class="note">${[].concat(sec.note).map((t) => `<li>${esc(t)}</li>`).join("")}</ul>` : ""}
-      </section>`).join("");
+        ${sec.note ? `<ul class="note">${[].concat(sec.note).map((t) => `<li>${esc(t)}</li>`).join("")}</ul>` : ""}`;
+      return `<section class="${sec.sub ? "subsec" : ""}${sec.fold ? " fold" : ""}">${head}${body}</section>`;
+    }).join("");
     updateBar();
   }
 
@@ -904,6 +928,17 @@
   }
 
   $("#main").addEventListener("click", (e) => {
+    const fb = e.target.closest("[data-fold]");
+    if (fb) {
+      const t = fb.dataset.fold;
+      if (isFoldOpen(t)) {
+        if (foldHasOn(t)) { toast("中の書類が選ばれているので閉じられません。選択を外してから閉じてください。"); return; }
+        foldOpen.delete(t);
+      } else foldOpen.add(t);
+      render();
+      document.querySelector(`[data-fold="${CSS.escape(t)}"]`)?.focus();
+      return;
+    }
     const card = e.target.closest(".item");
     if (!card || card.classList.contains("none")) return;
     const x = byId(card.dataset.id);
