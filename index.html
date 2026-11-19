@@ -477,7 +477,11 @@
   }
   .fold-btn::before { content: ""; width: 5px; height: 1.1em; border-radius: 2px; background: var(--ink); flex: none; }
   .fold-btn:hover { border-color: var(--ink); }
-  .fold-btn[aria-expanded="true"] { border-style: solid; border-color: var(--ink); margin-bottom: 12px; }
+  .fold-btn[aria-expanded="true"] { border-style: solid; border-color: var(--ink); border-radius: var(--r) var(--r) 0 0; }
+  /* 開いた欄だけ、うすい青の地にして、ほかの欄と区別する */
+  .fold-body { background: #DCE4EE; border: 1px solid var(--ink); border-top: none; border-radius: 0 0 var(--r) var(--r); padding: 14px 14px 16px; }
+  .fold-body .subsec { border-left-color: #B7C3D3; }
+  .fold-body .note { border-left-color: #B7C3D3; }
   .fold-mark { margin-left: auto; font-size: .85rem; letter-spacing: .04em; padding: 2px 12px; border-radius: 999px; background: var(--ink); color: #fff; }
   .fold-btn[aria-expanded="true"] .fold-mark { background: var(--sheet); color: var(--ink); border: 1px solid var(--ink); }
 
@@ -613,7 +617,7 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="peek" id="peek" aria-hidden="true"></div>
 
-<script src="data.js?v=20261119a"></script>
+<script src="data.js?v=20261119b"></script>
 <script src="attach.js?v=20261117a"></script>
 <script>
 (() => {
@@ -885,17 +889,22 @@
   const foldHasOn = (title) => items.some((x) => x.on && (x.sec === title || (SECTIONS.find((s) => s.title === x.sec) || {}).foldIn === title));
   const isFoldOpen = (title) => foldOpen.has(title) || foldHasOn(title);
 
+  function sectionHtml(sec) {
+    const open = sec.fold && isFoldOpen(sec.title);
+    const head = sec.fold
+      ? `<h2><button type="button" class="fold-btn" data-fold="${esc(sec.title)}" aria-expanded="${open}">${esc(sec.title)}<span class="fold-mark">${open ? "閉じる" : "開く"}</span></button></h2>`
+      : sec.sub ? `<h3>${esc(sec.title)}</h3>` : `<h2>${esc(sec.title)}</h2>`;
+    const body = sec.fold && !open ? "" : `
+      <div class="grid">${items.filter((x) => x.sec === sec.title).map(itemHtml).join("")}</div>
+      ${sec.note ? `<ul class="note">${[].concat(sec.note).map((t) => `<li>${esc(t)}</li>`).join("")}</ul>` : ""}`;
+    // 開く欄の中に、その欄に入る小見出しの欄（foldIn）を入れる
+    const inner = open ? SECTIONS.filter((s) => s.foldIn === sec.title).map(sectionHtml).join("") : "";
+    const cls = [sec.sub ? "subsec" : "", sec.fold ? "fold" : "", open ? "open" : ""].filter(Boolean).join(" ");
+    return `<section class="${cls}">${head}${open ? `<div class="fold-body">${body}${inner}</div>` : body}</section>`;
+  }
+
   function render() {
-    $("#main").innerHTML = SECTIONS.map((sec) => {
-      if (sec.foldIn && !isFoldOpen(sec.foldIn)) return "";
-      const head = sec.fold
-        ? `<h2><button type="button" class="fold-btn" data-fold="${esc(sec.title)}" aria-expanded="${isFoldOpen(sec.title)}">${esc(sec.title)}<span class="fold-mark">${isFoldOpen(sec.title) ? "閉じる" : "開く"}</span></button></h2>`
-        : sec.sub ? `<h3>${esc(sec.title)}</h3>` : `<h2>${esc(sec.title)}</h2>`;
-      const body = sec.fold && !isFoldOpen(sec.title) ? "" : `
-        <div class="grid">${items.filter((x) => x.sec === sec.title).map(itemHtml).join("")}</div>
-        ${sec.note ? `<ul class="note">${[].concat(sec.note).map((t) => `<li>${esc(t)}</li>`).join("")}</ul>` : ""}`;
-      return `<section class="${sec.sub ? "subsec" : ""}${sec.fold ? " fold" : ""}">${head}${body}</section>`;
-    }).join("");
+    $("#main").innerHTML = SECTIONS.filter((sec) => !sec.foldIn).map(sectionHtml).join("");
     updateBar();
   }
 

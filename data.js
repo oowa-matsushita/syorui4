@@ -93,6 +93,10 @@ const PRINT_ORDER = [
   "還付書類（山形県）（見本）",
   "還付書類（福島県）（見本）",
   "名義人の印鑑証明書",          // ここから「下取りが別名義の場合」
+  "名義人の住民票",
+  "名義人の戸籍の附票",
+  "名義人の戸籍の除票",
+  "名義人の戸籍謄本",
   "委任状（名義人）",
   "委任状（名義人・個人）（見本）",
   "委任状（名義人・法人）（見本）",
@@ -180,6 +184,10 @@ const SECTIONS = [
     coverGroup: "下取り車両が別名義の場合",
     items: [
       { name: "名義人の印鑑証明書", obtain: true },   // 印刷はせず頭紙にだけ載せる
+      { name: "名義人の住民票", obtain: true, listName: "名義人の住民票（本人のみ　マイナンバー・本籍不要）" },
+      { name: "名義人の戸籍の附票", obtain: true },
+      { name: "名義人の戸籍の除票", obtain: true },
+      { name: "名義人の戸籍謄本", obtain: true },
       { name: "委任状", key: "委任状（名義人）", listName: "委任状（名義人の実印）（{name}）", choices: [
         { name: "個人", file: "ininjo.pdf", mihon: "mihon-ininjo.jpg",        mihonName: "委任状（名義人・個人）（見本）" },
         { name: "法人", file: "ininjo.pdf", mihon: "mihon-ininjo-houjin.jpg", mihonName: "委任状（名義人・法人）（見本）" },
@@ -192,6 +200,11 @@ const SECTIONS = [
         { name: "軽・個人", file: "shinsei-irai.pdf", mihon: "mihon-shinsei-irai-shitadori.jpg",        mihonName: "申請依頼書（名義人・個人）（見本）" },
         { name: "軽・法人", file: "shinsei-irai.pdf", mihon: "mihon-shinsei-irai-shitadori-houjin.jpg", mihonName: "申請依頼書（名義人・法人）（見本）" },
       ] },
+    ],
+    note: [
+      "名義人の引越1回　名義人の印鑑証明書・住民票",
+      "名義人の引越2回以上　名義人の印鑑証明書・住民票・戸籍の附票",
+      "名義人の名字変更　名義人の戸籍謄本",
     ],
   },
   {
