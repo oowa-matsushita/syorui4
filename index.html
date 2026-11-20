@@ -1249,12 +1249,13 @@
   }
 
 
-  // ---------- 配置図を住所から作る（地図：国土地理院） ----------
+  // ---------- 配置図を住所から作る（地図：OpenStreetMap／住所検索：国土地理院） ----------
   // 用紙（A4横・pt）の中の「所在図記載欄」「配置図記載欄」の位置
   const HZ = { W: 841.89, H: 595.28, L: { x: 59, y: 136.5, w: 343.5, h: 301.5 }, R: { x: 406.5, y: 136.5, w: 343.5, h: 301.5 } };
-  const GSI_TILE = "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png";
-  const GSI_MAX = 18;                 // 地理院地図（標準）の一番細かい地図
-  const ZOOM_R = 20;                  // 配置図の欄は、いちばん拡大した状態で表示
+  // 地図は OpenStreetMap（利用者の選択。道路名・店名が載って見やすい）。印刷物に「© OpenStreetMap contributors」を必ず入れる
+  const TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
+  const TILE_MAX = 19;                // OpenStreetMap の一番細かい地図（これより拡大すると引き伸ばしでぼやける）
+  const ZOOM_R = 19;                  // 配置図の欄は、いちばん細かい地図で表示
   const GSI_GEO = "https://msearch.gsi.go.jp/address-search/AddressSearch?q=";
   const mk = $("#maker");
   let mkItem = null, mapL = null, mapR = null, pins = {}, pinsR = {}, mkLine = null, leafletReady = null;
@@ -1357,8 +1358,8 @@
     if (pts.length === 1) mapL.setView(pts[0], 16);
     else if (pts.length > 1) mapL.fitBounds(L.latLngBounds(pts).pad(0.35), { maxZoom: 17 });
   }
-  const tileLayer = () => L.tileLayer(GSI_TILE, { maxNativeZoom: GSI_MAX, maxZoom: ZOOM_R,
-    attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">地理院タイル</a>' });
+  const tileLayer = () => L.tileLayer(TILE_URL, { maxNativeZoom: TILE_MAX, maxZoom: ZOOM_R,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>' });
 
   async function openMaker(x) {
     mkItem = x;
@@ -1370,7 +1371,7 @@
     mk.showModal();
     try { await loadLeaflet(); } catch (e) { $("#mkMsg").textContent = e.message; return; }
     if (!mapL) {
-      mapL = L.map("mkMap", { zoomSnap: 1, maxZoom: GSI_MAX }).setView([34.77, 138.01], 15);
+      mapL = L.map("mkMap", { zoomSnap: 1, maxZoom: TILE_MAX }).setView([34.77, 138.01], 15);
       tileLayer().addTo(mapL);
       mapR = L.map("mkMapR", { zoomSnap: 1, minZoom: 16, maxZoom: ZOOM_R }).setView([34.77, 138.01], ZOOM_R);
       tileLayer().addTo(mapR);
@@ -1472,7 +1473,7 @@
   }
   // 画面の地図に見えている範囲を、欄いっぱいに描く
   async function drawTiles(g, B, map) {
-    const z = map.getZoom(), tz = Math.min(z, GSI_MAX), f = 2 ** (z - tz), pb = map.getPixelBounds();
+    const z = map.getZoom(), tz = Math.min(z, TILE_MAX), f = 2 ** (z - tz), pb = map.getPixelBounds();
     const vw = pb.max.x - pb.min.x, vh = pb.max.y - pb.min.y;
     const k = Math.max(B.w / vw, B.h / vh);
     const ox = pb.min.x + (vw - B.w / k) / 2, oy = pb.min.y + (vh - B.h / k) / 2;
@@ -1483,7 +1484,7 @@
     for (let tx = Math.floor(ox / T); tx <= Math.floor((ox + B.w / k) / T); tx++)
       for (let ty = Math.floor(oy / T); ty <= Math.floor((oy + B.h / k) / T); ty++) {
         if (ty < 0 || ty >= n) continue;
-        const url = GSI_TILE.replace("{z}", tz).replace("{x}", ((tx % n) + n) % n).replace("{y}", ty);
+        const url = TILE_URL.replace("{z}", tz).replace("{x}", ((tx % n) + n) % n).replace("{y}", ty);
         jobs.push(loadImg(url).then((im) => g.drawImage(im, tx * T, ty * T, T, T)).catch(() => { fail++; }));
       }
     await Promise.all(jobs);
@@ -1497,7 +1498,7 @@
     g.fillStyle = "#000"; g.font = `700 10px ${PF}`; g.textAlign = "center"; g.fillText("北", B.x + B.w - 18, B.y + 17);
     g.beginPath(); g.moveTo(B.x + B.w - 18, B.y + 20); g.lineTo(B.x + B.w - 23, B.y + 36); g.lineTo(B.x + B.w - 18, B.y + 32); g.lineTo(B.x + B.w - 13, B.y + 36); g.closePath(); g.fill();
     g.font = `400 6.5px ${PF}`; g.textAlign = "right";
-    const src = "出典：国土地理院 地理院地図", w = g.measureText(src).width;
+    const src = "© OpenStreetMap contributors", w = g.measureText(src).width;
     g.fillStyle = "rgba(255,255,255,.85)"; g.fillRect(B.x + B.w - w - 6, B.y + B.h - 10, w + 6, 10);
     g.fillStyle = "#000"; g.fillText(src, B.x + B.w - 3, B.y + B.h - 3);
     g.restore();
